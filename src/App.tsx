@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { ActiveAppView, CitizenTab, CivicReport, FilterState } from './types';
+import { ActiveAppView, CitizenTab, CivicReport, FilterState, CitizenUser, EmployeeUser } from './types';
 import { INITIAL_REPORTS } from './data/mockReports';
-import { Header } from './components/Header';
+import { AuthorityHeader } from './components/AuthorityHeader';
+import { FieldCrewHeader } from './components/FieldCrewHeader';
+import { CitizenHeader } from './components/CitizenHeader';
+import { CitizenLogin } from './components/CitizenLogin';
+import { EmployeeLogin } from './components/EmployeeLogin';
 import { AuthorityDashboard } from './components/AuthorityDashboard';
+import { LandingPage } from './components/LandingPage';
 import { CitizenReportFlow } from './components/CitizenReportFlow';
 import { CitizenMyReports } from './components/CitizenMyReports';
 import { FieldCrewConsole } from './components/FieldCrewConsole';
@@ -11,8 +16,11 @@ import { CheckCircle2, Bell, AlertTriangle } from 'lucide-react';
 
 export default function App() {
   const [reports, setReports] = useState<CivicReport[]>(INITIAL_REPORTS);
-  const [currentView, setCurrentView] = useState<ActiveAppView>('authority');
+  const [currentView, setCurrentView] = useState<ActiveAppView>('landing');
   const [citizenTab, setCitizenTab] = useState<CitizenTab>('report');
+  const [citizenUser, setCitizenUser] = useState<CitizenUser | null>(null);
+  const [authorityUser, setAuthorityUser] = useState<EmployeeUser | null>(null);
+  const [fieldCrewUser, setFieldCrewUser] = useState<EmployeeUser | null>(null);
   const [isMobileFrame, setIsMobileFrame] = useState<boolean>(false);
   const [selectedReport, setSelectedReport] = useState<CivicReport | null>(null);
 
@@ -62,20 +70,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-amber-200 selection:text-slate-900">
       
-      {/* 1. Universal Municipal Operational Header */}
-      <Header
-        currentView={currentView}
-        onViewChange={(v) => {
-          setCurrentView(v);
-        }}
-        isMobileFrame={isMobileFrame}
-        onToggleMobileFrame={() => setIsMobileFrame(!isMobileFrame)}
-        criticalCount={criticalCount}
-        totalActive={totalActive}
-      />
-
       {/* Operational notification toast ticker */}
-      {notification && (
+      {currentView !== 'landing' && notification && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between text-xs text-amber-950">
           <div className="flex items-center gap-2 truncate max-w-5xl">
             <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
@@ -93,20 +89,34 @@ export default function App() {
 
       {/* 2. Main Content Area depending on View */}
       <main className="flex-1 flex flex-col">
+        {/* VIEW 0: LANDING PAGE */}
+        {currentView === 'landing' && <LandingPage onViewChange={setCurrentView} />}
+
         {/* VIEW 1: AUTHORITY DASHBOARD (DESKTOP OPS CENTER) */}
         {currentView === 'authority' && (
-          <AuthorityDashboard
-            reports={reports}
-            filter={filter}
-            onFilterChange={handleFilterChange}
-            onSelectReport={(rep) => setSelectedReport(rep)}
-            selectedReportId={selectedReport?.id}
-          />
+          !authorityUser ? (
+            <EmployeeLogin portalType="authority" onLogin={setAuthorityUser} onBack={() => setCurrentView('landing')} />
+          ) : (
+            <div className="flex-1 flex flex-col">
+              <AuthorityHeader onLogout={() => { setAuthorityUser(null); setCurrentView('landing'); }} criticalCount={criticalCount} totalActive={totalActive} />
+              <AuthorityDashboard
+                reports={reports}
+                filter={filter}
+                onFilterChange={handleFilterChange}
+                onSelectReport={(rep) => setSelectedReport(rep)}
+                selectedReportId={selectedReport?.id}
+              />
+            </div>
+          )
         )}
 
         {/* VIEW 2: CITIZEN PORTAL (MOBILE-FIRST / RESPONSIVE) */}
         {currentView === 'citizen' && (
-          <div className="flex-1 flex flex-col bg-slate-100">
+          !citizenUser ? (
+            <CitizenLogin onLogin={setCitizenUser} onBack={() => setCurrentView('landing')} />
+          ) : (
+            <div className="flex-1 flex flex-col bg-slate-100">
+              <CitizenHeader user={citizenUser} onLogout={() => { setCitizenUser(null); setCurrentView('landing'); }} />
             {/* Citizen internal subnav */}
             <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-center gap-3 text-xs shadow-xs">
               <button
@@ -145,6 +155,7 @@ export default function App() {
                   <div className="flex-1">
                     {citizenTab === 'report' ? (
                       <CitizenReportFlow
+                        user={citizenUser}
                         onSubmitReport={handleAddNewReport}
                         onNavigateToMyReports={() => setCitizenTab('my_reports')}
                         onNavigateToAuthority={() => setCurrentView('authority')}
@@ -163,6 +174,7 @@ export default function App() {
               <div className="flex-1">
                 {citizenTab === 'report' ? (
                   <CitizenReportFlow
+                    user={citizenUser}
                     onSubmitReport={handleAddNewReport}
                     onNavigateToMyReports={() => setCitizenTab('my_reports')}
                     onNavigateToAuthority={() => setCurrentView('authority')}
@@ -177,17 +189,23 @@ export default function App() {
               </div>
             )}
           </div>
+          )
         )}
 
         {/* VIEW 3: FIELD CREW CONSOLE */}
         {currentView === 'field_crew' && (
-          <div className="flex-1 bg-slate-100">
-            <FieldCrewConsole
-              reports={reports}
-              onUpdateReport={handleUpdateReport}
-              onSelectReport={(rep) => setSelectedReport(rep)}
-            />
-          </div>
+          !fieldCrewUser ? (
+            <EmployeeLogin portalType="field_crew" onLogin={setFieldCrewUser} onBack={() => setCurrentView('landing')} />
+          ) : (
+            <div className="flex-1 flex flex-col bg-slate-100">
+              <FieldCrewHeader onLogout={() => { setFieldCrewUser(null); setCurrentView('landing'); }} />
+              <FieldCrewConsole
+                reports={reports}
+                onUpdateReport={handleUpdateReport}
+                onSelectReport={(rep) => setSelectedReport(rep)}
+              />
+            </div>
+          )
         )}
       </main>
 
@@ -201,6 +219,7 @@ export default function App() {
       )}
 
       {/* Universal Footer */}
+      {currentView !== 'landing' && (
       <footer className="bg-white border-t border-slate-200 py-3 px-4 text-xs font-mono text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -215,6 +234,7 @@ export default function App() {
           </div>
         </div>
       </footer>
+      )}
 
     </div>
   );

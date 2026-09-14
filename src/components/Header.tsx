@@ -6,8 +6,7 @@ import {
   Clock,
   Maximize2,
   Minimize2,
-  ShieldCheck,
-  Landmark
+  ShieldCheck
 } from 'lucide-react';
 import { ActiveAppView } from '../types';
 
@@ -92,8 +91,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
         {/* Brand identity */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 shadow-sm">
-            <Landmark className="w-5 h-5" />
+          <div className="flex justify-center items-center">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Government_Of_Gujarat_Seal_In_All_Languages.svg"
+              alt="Gujarat government logo"
+              className="w-16 h-auto object-contain"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -116,11 +119,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="view-authority-btn"
               onClick={() => onViewChange('authority')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                currentView === 'authority'
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${currentView === 'authority'
                   ? 'bg-amber-600 text-white shadow-sm font-semibold'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-              }`}
+                }`}
             >
               <Building2 className="w-3.5 h-3.5" />
               <span>Authority Dashboard</span>
@@ -134,11 +136,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="view-citizen-btn"
               onClick={() => onViewChange('citizen')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                currentView === 'citizen'
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${currentView === 'citizen'
                   ? 'bg-blue-600 text-white shadow-sm font-semibold'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-              }`}
+                }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
               <span>Resident 311 Portal</span>
@@ -147,11 +148,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="view-fieldcrew-btn"
               onClick={() => onViewChange('field_crew')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                currentView === 'field_crew'
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${currentView === 'field_crew'
                   ? 'bg-emerald-600 text-white shadow-sm font-semibold'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-              }`}
+                }`}
             >
               <Truck className="w-3.5 h-3.5" />
               <span>Field Crew Dispatch</span>

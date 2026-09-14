@@ -111,6 +111,17 @@ export interface FilterState {
   dateRange: 'all' | 'today' | '7d' | '30d';
 }
 
-export type ActiveAppView = 'authority' | 'citizen' | 'field_crew';
+export interface CitizenUser {
+  name: string;
+  phone: string;
+  ward: Ward;
+}
+
+export interface EmployeeUser {
+  id: string;
+  role: 'authority' | 'field_crew';
+}
+
+export type ActiveAppView = 'landing' | 'authority' | 'citizen' | 'field_crew';
 export type AuthorityTab = 'map' | 'queue' | 'clusters';
 export type CitizenTab = 'report' | 'my_reports';

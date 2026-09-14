@@ -5,7 +5,6 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  Compass,
   Filter,
   AlertTriangle,
   Info,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react';
 import { CivicReport, FilterState, Ward } from '../types';
 import { CIVIC_CATEGORIES } from '../data/mockReports';
+import { GoogleMaps } from './GoogleMaps';
 
 interface GisMapViewProps {
   reports: CivicReport[];
@@ -215,7 +215,7 @@ export const GisMapView: React.FC<GisMapViewProps> = ({
         <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
           <div className="bg-white/95 backdrop-blur-sm border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-3 text-xs font-mono text-slate-700 pointer-events-auto shadow-sm">
             <span className="flex items-center gap-1.5 text-blue-700 font-bold">
-              <Compass className="w-3.5 h-3.5 text-blue-600" />
+              <GoogleMaps className="w-4 h-4" />
               METRO WEST MUNICIPAL GIS
             </span>
             <span className="text-slate-300">|</span>
