@@ -1,197 +1,315 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
+  :root {
+    --mat-primary: #4285F4;
+    --mat-primary-dark: #1A73E8;
+    --mat-secondary: #34A853;
+    --mat-bg: #F8F9FA;
+    --mat-surface: #FFFFFF;
+    --google-blue: #4285F4;
+    --google-red: #EA4335;
+    --google-yellow: #FBBC05;
+    --google-green: #34A853;
+  }
+
   body {
-    font-family: 'Public Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #0f172a;
-    background-color: #f8fafc;
+    background-color: #F8F9FA;
+    color: #202124;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  code, kbd, samp, pre, .font-mono {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Google Blue focus ring */
+  *:focus-visible {
+    outline: 2px solid #4285F4;
+    outline-offset: 2px;
   }
 }
 
-/* From Uiverse.io by ammarsaa */ 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 350px;
-  padding: 20px;
-  border-radius: 20px;
+/* Signature Google 4-Color Strip */
+.google-accent-bar {
+  background: linear-gradient(to right, #4285F4 25%, #EA4335 25% 50%, #FBBC05 50% 75%, #34A853 75% 100%);
+  height: 3.5px;
+  width: 100%;
+  display: block;
+  flex-shrink: 0;
+}
+
+.google-accent-ring {
+  background: conic-gradient(#4285F4, #EA4335, #FBBC05, #34A853, #4285F4);
+}
+
+/* Material Ink Ripple Effect */
+.ripple-surface {
   position: relative;
-  background-color: #1a1a1a;
-  color: #fff;
-  border: 1px solid #333;
+  overflow: hidden;
 }
 
-.title {
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -1px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-left: 30px;
-  color: #00bfff;
-}
-
-.title::before {
-  width: 18px;
-  height: 18px;
-}
-
-.title::after {
-  width: 18px;
-  height: 18px;
-  animation: pulse 1s linear infinite;
-}
-
-.title::before,
-.title::after {
+.ripple-circle {
   position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
   border-radius: 50%;
-  left: 0px;
-  background-color: #00bfff;
+  transform: scale(0);
+  animation: mat-ripple 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
 }
 
-.message, 
-.signin {
-  font-size: 14.5px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.signin {
-  text-align: center;
-}
-
-.signin a:hover {
-  text-decoration: underline royalblue;
-}
-
-.signin a {
-  color: #00bfff;
-}
-
-.flex {
-  display: flex;
-  width: 100%;
-  gap: 6px;
-}
-
-.form label {
-  position: relative;
-}
-
-.form label .input {
-  background-color: #333;
-  color: #fff;
-  width: 100%;
-  padding: 20px 05px 05px 10px;
-  outline: 0;
-  border: 1px solid rgba(105, 105, 105, 0.397);
-  border-radius: 10px;
-}
-
-.form label .input + span {
-  color: rgba(255, 255, 255, 0.5);
-  position: absolute;
-  left: 10px;
-  top: 0px;
-  font-size: 0.9em;
-  cursor: text;
-  transition: 0.3s ease;
-}
-
-.form label .input:placeholder-shown + span {
-  top: 12.5px;
-  font-size: 0.9em;
-}
-
-.form label .input:focus + span,
-.form label .input:valid + span {
-  color: #00bfff;
-  top: 0px;
-  font-size: 0.7em;
-  font-weight: 600;
-}
-
-.input {
-  font-size: medium;
-}
-
-.submit {
-  border: none;
-  outline: none;
-  padding: 10px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 16px;
-  transform: .3s ease;
-  background-color: #00bfff;
-}
-
-.submit:hover {
-  background-color: #00bfff96;
-}
-
-@keyframes pulse {
-  from {
-    transform: scale(0.9);
-    opacity: 1;
+@keyframes mat-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.35;
   }
-
-  to {
-    transform: scale(1.8);
+  100% {
+    transform: scale(3.5);
     opacity: 0;
   }
 }
 
-/* From Uiverse.io by csemszepp */ 
-.custum-file-upload {
-  height: 200px;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: space-between;
-  gap: 20px;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #e8e8e8;
-  background-color: #212121;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0px 48px 35px -48px #e8e8e8;
+/* Material Standard Easing */
+.mat-transition {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.custum-file-upload .icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Custom Scrollbar for smooth mobile/desktop feed */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.custum-file-upload .icon svg {
-  height: 80px;
-  fill: #e8e8e8;
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
-.custum-file-upload .text {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
 
-.custum-file-upload .text span {
-  font-weight: 400;
-  color: #e8e8e8;
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.custum-file-upload input {
-  display: none;
+/* Leaflet Map custom fixes */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  font-family: inherit;
+  border-radius: 0.75rem;
 }
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* Pulse animation for high priority items */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+/* Custom shimmer loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ==========================================================================
+   Rewards, Badges & Trophy Case Animations & Effects
+   ========================================================================== */
+
+/* Badge Light-Sweep Shimmer */
+@keyframes badge-shimmer-sweep {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.badge-shimmer-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-shimmer-container::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 65%
+  );
+  transform: translateX(-160%) skewX(-20deg);
+  pointer-events: none;
+  animation: badge-shimmer-sweep 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge-shimmer-container:hover::after {
+  animation: badge-shimmer-sweep 1s ease-in-out;
+}
+
+/* Golden Claim / Collect Button Glow Pulse */
+@keyframes gold-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(245, 166, 35, 0.28), 0 0 0 0 rgba(251, 188, 5, 0.45);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(245, 166, 35, 0.5), 0 0 0 7px rgba(251, 188, 5, 0);
+  }
+}
+
+.btn-golden-claim {
+  background: linear-gradient(135deg, #FBBC05 0%, #F59E0B 50%, #E67C00 100%);
+  color: #202124;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: gold-pulse-glow 2.5s infinite ease-in-out;
+}
+
+.btn-golden-claim:hover {
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 50%, #D97706 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 166, 35, 0.45);
+}
+
+.btn-golden-claim:active {
+  transform: translateY(0px);
+}
+
+/* Celebratory Badge Bounce Scale-In */
+@keyframes bounce-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-8deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(4deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-bounce-scale-in {
+  animation: bounce-scale-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Ambient Trophy Glow */
+@keyframes ambient-trophy-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(251, 188, 5, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 22px rgba(251, 188, 5, 0.65));
+  }
+}
+
+.animate-trophy-glow {
+  animation: ambient-trophy-glow 3s infinite ease-in-out;
+}
+
+/* Trophy Shelf Card Aesthetics */
+.trophy-shelf-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF5 100%);
+  border: 1.5px solid #FEEFC3;
+  box-shadow: 0 4px 14px -2px rgba(251, 188, 5, 0.15), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trophy-shelf-card:hover {
+  transform: translateY(-2px);
+  border-color: #FBBC05;
+  box-shadow: 0 8px 24px -4px rgba(251, 188, 5, 0.28), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+}
+
+.trophy-shelf-card-locked {
+  background: #F8F9FA;
+  border: 1.5px dashed #DADCE0;
+  opacity: 0.72;
+  filter: grayscale(0.85);
+  transition: all 0.25s ease;
+}
+
+.trophy-shelf-card-locked:hover {
+  opacity: 0.92;
+  filter: grayscale(0.4);
+  border-color: #BDC1C6;
+}
+
+/* Accessibility: Pre-fers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .badge-shimmer-container::after {
+    animation: none !important;
+    display: none !important;
+  }
+  .btn-golden-claim {
+    animation: none !important;
+  }
+  .animate-bounce-scale-in {
+    animation: none !important;
+    transform: none !important;
+  }
+  .animate-trophy-glow {
+    animation: none !important;
+  }
+  .trophy-shelf-card:hover {
+    transform: none !important;
+  }
+}
+
