@@ -424,7 +424,7 @@ export const createListingDocument = async (
     ticketNumber,
     title: data.title.trim() || `${data.category} issue at ${data.address.split(',')[0]}`,
     category: data.category,
-    description: data.description || 'Reported via Civic Hero citizen community listing.',
+    description: data.description || 'Reported via Urbanfix Intelligence citizen community listing.',
     address: data.address,
     ward: data.ward,
     lat: data.lat,

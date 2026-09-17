@@ -505,7 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addPoints(50, 'Welcome Bonus');
     addToast({
       title: 'Profile Created! +50 XP 🌟',
-      message: `Welcome to Civic Hero, ${finalName}!`,
+      message: `Welcome to Urban Fix, ${finalName}!`,
       type: 'success',
     });
     triggerCelebration();
@@ -615,7 +615,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       customCategory: data.customCategory,
       severity: data.severity,
       status: 'Submitted',
-      description: data.description || 'Reported via Civic Hero citizen community listing.',
+      description: data.description || 'Reported via Urban Fix citizen community listing.',
       location: data.location,
       photoUrl: data.photoUrl,
       photos: photosList,
@@ -652,7 +652,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       category: effectiveCategory,
       customCategory: data.customCategory,
       severity: data.severity,
-      description: data.description || 'Reported via Civic Hero citizen community listing.',
+      description: data.description || 'Reported via Urban Fix citizen community listing.',
       photoFiles: filesToUpload,
       address: data.location.address,
       ward: data.location.ward,

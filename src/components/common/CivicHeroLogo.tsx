@@ -66,7 +66,7 @@ export const CivicHeroIcon: React.FC<{
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`shrink-0 select-none ${className}`}
-      aria-label="Civic Hero Brand Mark"
+      aria-label="Urban Fix Brand Mark"
       role="img"
     >
       {/* 4-Color Base / Road Accent in Google Sequence: Blue, Red, Yellow, Green */}
@@ -151,8 +151,8 @@ export const CivicHeroLogo: React.FC<CivicHeroLogoProps> = ({
         <CivicHeroIcon size={currentSize.icon} monochrome={monochrome} inverted={inverted} />
         <div className="flex flex-col items-center">
           <div className={`font-bold tracking-tight ${currentSize.text} leading-none flex items-center space-x-1.5`}>
-            <span className={civicColor}>CIVIC</span>
-            <span className={heroColor}>HERO</span>
+            <span className={civicColor}>URBAN</span>
+            <span className={heroColor}>FIX</span>
           </div>
           {showTagline && (
             <span className={`font-medium tracking-[0.18em] uppercase ${currentSize.tagline} ${taglineColor} mt-1.5`}>
@@ -169,8 +169,8 @@ export const CivicHeroLogo: React.FC<CivicHeroLogoProps> = ({
     return (
       <div onClick={onClick} className={`flex flex-col ${onClick ? 'cursor-pointer' : ''} ${className}`}>
         <div className={`font-bold tracking-tight ${currentSize.text} leading-tight flex items-center space-x-1.5`}>
-          <span className={civicColor}>CIVIC</span>
-          <span className={heroColor}>HERO</span>
+          <span className={civicColor}>URBAN</span>
+          <span className={heroColor}>FIX</span>
         </div>
         {showTagline && (
           <span className={`font-medium tracking-[0.16em] uppercase ${currentSize.tagline} ${taglineColor} mt-0.5`}>
@@ -190,8 +190,8 @@ export const CivicHeroLogo: React.FC<CivicHeroLogoProps> = ({
       <CivicHeroIcon size={currentSize.icon} monochrome={monochrome} inverted={inverted} />
       <div className="flex flex-col justify-center">
         <div className={`font-bold tracking-tight ${currentSize.text} leading-tight flex items-center space-x-1`}>
-          <span className={civicColor}>CIVIC</span>
-          <span className={heroColor}>HERO</span>
+          <span className={civicColor}>URBAN</span>
+          <span className={heroColor}>FIX</span>
         </div>
         {showTagline && (
           <span className={`font-medium tracking-[0.14em] uppercase ${currentSize.tagline} ${taglineColor} mt-0.5 whitespace-nowrap block`}>
