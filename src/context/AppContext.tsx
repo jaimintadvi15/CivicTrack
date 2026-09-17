@@ -36,6 +36,7 @@ import {
   updateListingStatusDocument,
   resolveListingDocument,
 } from '../services/listingsService';
+import { evaluateAndEscalateOverdueIssues } from '../services/slaService';
 
 interface ToastData {
   id: string;
@@ -226,6 +227,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (unsubscribe) unsubscribe();
     };
   }, [session?.userId, currentUser.id]);
+
+  // Automatic SLA background check & server-side sync engine
+  useEffect(() => {
+    const runSlaCheck = () => {
+      const result = evaluateAndEscalateOverdueIssues(issues);
+      if (result.escalatedIssues.length > 0) {
+        setIssues(result.updatedIssues);
+        if (result.notifications.length > 0) {
+          setNotifications((prev) => [...result.notifications, ...prev]);
+        }
+        result.escalatedIssues.forEach((issue) => {
+          addToast({
+            title: '⚠️ SLA Deadline Exceeded',
+            message: `Ticket #${issue.ticketNumber} was automatically escalated to Municipal HQ.`,
+            type: 'info',
+          });
+        });
+      }
+    };
+
+    runSlaCheck();
+    const interval = setInterval(runSlaCheck, 30000);
+
+    return () => clearInterval(interval);
+  }, [issues]);
 
   // Sync Firebase Auth UID with session if phone auth completes
   useEffect(() => {

@@ -1,60 +1,70 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { CheckCircle2, Clock, AlertTriangle, TrendingUp, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Clock, AlertTriangle, ShieldAlert, Zap } from 'lucide-react';
+import { computeSlaStatus } from '../../config/slaConfig';
 
 export const AnalyticsOverview: React.FC = () => {
   const { issues } = useApp();
 
+  const nowMs = Date.now();
   const resolvedCount = issues.filter((i) => i.status === 'Resolved').length;
-  const criticalCount = issues.filter((i) => i.severity === 'Critical' && i.status !== 'Resolved').length;
+  const resolvedWithinSlaCount = issues.filter((i) => i.status === 'Resolved' && i.wasResolvedWithinSLA !== false).length;
+  const slaMetRate = resolvedCount > 0 ? Math.round((resolvedWithinSlaCount / resolvedCount) * 100) : 100;
 
-  // Calculate top problem areas / wards
-  const wardMap: Record<string, number> = {};
-  issues.forEach((i) => {
-    wardMap[i.location.ward] = (wardMap[i.location.ward] || 0) + 1;
-  });
-  const topWard = Object.entries(wardMap).sort((a, b) => b[1] - a[1])[0] || ['Indiranagar', 0];
+  const dueSoonCount = issues.filter((i) => {
+    if (i.status === 'Resolved') return false;
+    const st = computeSlaStatus(i, nowMs);
+    return st === 'DUE_SOON' || st === 'URGENT';
+  }).length;
+
+  const escalatedCount = issues.filter((i) => {
+    if (i.status === 'Resolved') return false;
+    const st = computeSlaStatus(i, nowMs);
+    return st === 'ESCALATED' || st === 'OVERDUE';
+  }).length;
+
+  const activeCount = issues.filter((i) => i.status !== 'Resolved').length;
 
   const cards = [
     {
+      title: 'Active Complaints',
+      value: `${activeCount}`,
+      subtext: `${issues.length} total registered`,
+      icon: <Clock className="w-5 h-5 text-[#1A73E8]" />,
+      bg: 'bg-white border-gray-200',
+      textColor: 'text-[#1A73E8]',
+    },
+    {
+      title: 'Complaints Due Soon',
+      value: `${dueSoonCount}`,
+      subtext: '< 24h SLA remaining',
+      icon: <Zap className="w-5 h-5 text-[#B06000]" />,
+      bg: 'bg-white border-gray-200',
+      textColor: 'text-[#B06000]',
+    },
+    {
+      title: 'Auto Escalated to HQ',
+      value: `${escalatedCount}`,
+      subtext: 'SLA deadline exceeded',
+      icon: <ShieldAlert className="w-5 h-5 text-[#C5221F]" />,
+      bg: 'bg-white border-gray-200',
+      textColor: 'text-[#C5221F]',
+    },
+    {
       title: 'Issues Resolved',
       value: `${resolvedCount}`,
-      subtext: '+12% vs last week',
-      icon: <CheckCircle2 className="w-5 h-5 text-mat-secondary" />,
+      subtext: 'Field team verified',
+      icon: <CheckCircle2 className="w-5 h-5 text-[#137333]" />,
       bg: 'bg-white border-gray-200',
-      textColor: 'text-mat-secondary',
+      textColor: 'text-[#137333]',
     },
     {
-      title: 'Avg Resolution Time',
-      value: '4.2 hrs',
-      subtext: 'Target SLA: < 6.0 hrs',
-      icon: <Clock className="w-5 h-5 text-mat-low" />,
+      title: 'SLA Compliance Rate',
+      value: `${slaMetRate}%`,
+      subtext: `${resolvedWithinSlaCount}/${resolvedCount || 1} met SLA`,
+      icon: <CheckCircle2 className="w-5 h-5 text-[#137333]" />,
       bg: 'bg-white border-gray-200',
-      textColor: 'text-mat-low',
-    },
-    {
-      title: 'Critical Hazards',
-      value: `${criticalCount}`,
-      subtext: 'Immediate action required',
-      icon: <AlertTriangle className="w-5 h-5 text-mat-critical" />,
-      bg: 'bg-white border-gray-200',
-      textColor: 'text-mat-critical',
-    },
-    {
-      title: 'Top Problem Ward',
-      value: topWard[0].split('-')[1]?.trim() || topWard[0],
-      subtext: `${topWard[1]} active complaints`,
-      icon: <TrendingUp className="w-5 h-5 text-mat-high" />,
-      bg: 'bg-white border-gray-200',
-      textColor: 'text-mat-high',
-    },
-    {
-      title: 'Citizen Satisfaction',
-      value: '94.8%',
-      subtext: 'Based on 420 ratings',
-      icon: <ShieldCheck className="w-5 h-5 text-mat-secondary" />,
-      bg: 'bg-white border-gray-200',
-      textColor: 'text-mat-secondary',
+      textColor: 'text-[#137333]',
     },
   ];
 

@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { CivicIssue } from '../../types';
 import { getAssetUrl } from '../../utils/assetUrl';
 import { createRipple } from '../common/MaterialRipple';
+import { DeadlineTimer } from '../common/DeadlineTimer';
 import {
   CheckCircle2,
   Clock,
@@ -130,6 +131,9 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({ issue, onC
 
         {/* Scrollable Content Body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Full SLA & Deadline Timer Card */}
+          <DeadlineTimer issue={issue} variant="card" />
+
           {/* Before & After Photos (If Resolved) */}
           {issue.status === 'Resolved' && issue.afterPhotoUrl ? (
             <div className="bg-[#E6F4EA] border border-[#CEEAD6] rounded p-3.5">

@@ -5,6 +5,7 @@ import { getAssetUrl } from '../../utils/assetUrl';
 import { isListingOwner } from '../../utils/ownership';
 import { auth } from '../../lib/firebase';
 import { createRipple } from '../common/MaterialRipple';
+import { DeadlineTimer } from '../common/DeadlineTimer';
 import {
   X,
   MapPin,
@@ -134,6 +135,8 @@ export const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
 
       {/* 2. Scrollable Body */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        {/* Full SLA & Deadline Timer Card */}
+        <DeadlineTimer issue={issue} variant="card" />
         {/* Horizontal Status Stepper */}
         <div className="bg-[#F8F9FA] rounded border border-[#DADCE0] p-3.5">
           <div className="flex items-center justify-between text-[11px] font-medium text-[#5F6368] mb-3">

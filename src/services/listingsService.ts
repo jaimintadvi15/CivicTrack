@@ -17,10 +17,11 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { db, storage, isFirebaseConfigured } from '../lib/firebase';
-import { CivicIssue, IssueCategory, IssueSeverity, IssueStatus, TimelineEvent } from '../types';
+import { CivicIssue, IssueCategory, IssueSeverity, IssueStatus, TimelineEvent, SlaStatus, EscalationEvent } from '../types';
 import { initialIssues } from '../data/mockData';
 import { getAssetUrl } from '../utils/assetUrl';
 import { normalizePhone } from '../utils/ownership';
+import { getSlaDurationHours, calculateSlaDeadline, computeSlaStatus } from '../config/slaConfig';
 
 export interface FirestoreListing {
   id?: string;
@@ -53,6 +54,19 @@ export interface FirestoreListing {
   resolutionRemarks?: string;
   resolvedAt?: string;
   voiceNoteTranscription?: string;
+
+  // SLA fields
+  slaDurationHours?: number;
+  slaStartedAt?: string;
+  slaDeadlineAt?: string;
+  slaStatus?: SlaStatus;
+  actualResolutionHours?: number;
+  wasResolvedWithinSLA?: boolean;
+  escalatedAt?: string;
+  escalatedFrom?: string;
+  escalatedTo?: string;
+  escalationReason?: string;
+  escalationHistory?: EscalationEvent[];
 }
 
 const LOCAL_STORAGE_KEY = 'civic_hero_persistent_listings_v1';
@@ -156,13 +170,33 @@ export const mapListingToCivicIssue = (
     mergedCount: listing.mergedCount || 0,
     assignedWorkerId: listing.assignedWorkerId,
     assignedWorkerName: listing.assignedWorkerName,
-    targetResolutionHours: listing.targetResolutionHours,
+    targetResolutionHours: listing.targetResolutionHours || listing.slaDurationHours || getSlaDurationHours((listing.category as IssueCategory) || 'Other', listing.severity, listing.title),
     citizenId: listing.reporterId,
     citizenName: listing.reporterName,
     reporterPhone: listing.reporterPhone,
     includeReporterContact: listing.includeReporterContact,
     resolutionRemarks: listing.resolutionRemarks,
     resolvedAt: listing.resolvedAt,
+
+    // SLA & Escalation mapping
+    slaDurationHours: listing.slaDurationHours || getSlaDurationHours((listing.category as IssueCategory) || 'Other', listing.severity, listing.title),
+    slaStartedAt: listing.slaStartedAt,
+    slaDeadlineAt: listing.slaDeadlineAt,
+    slaStatus: listing.slaStatus || computeSlaStatus({
+      status: listing.status,
+      slaDeadlineAt: listing.slaDeadlineAt,
+      wasResolvedWithinSLA: listing.wasResolvedWithinSLA,
+      resolvedAt: listing.resolvedAt,
+      slaStatus: listing.slaStatus,
+      escalatedAt: listing.escalatedAt,
+    }),
+    actualResolutionHours: listing.actualResolutionHours,
+    wasResolvedWithinSLA: listing.wasResolvedWithinSLA,
+    escalatedAt: listing.escalatedAt,
+    escalatedFrom: listing.escalatedFrom,
+    escalatedTo: listing.escalatedTo,
+    escalationReason: listing.escalationReason,
+    escalationHistory: listing.escalationHistory || [],
   };
 };
 
@@ -419,6 +453,12 @@ export const createListingDocument = async (
 
   const effectivePhotos = photoUrls.length > 0 ? photoUrls : [getAssetUrl('issues/garbage.jpg')];
 
+  const nowMs = Date.now();
+  const nowIso = new Date(nowMs).toISOString();
+  const slaDurationHours = getSlaDurationHours(data.category, data.severity, data.title);
+  const slaDeadlineAt = calculateSlaDeadline(nowIso, slaDurationHours);
+  const slaStatus = computeSlaStatus({ slaDeadlineAt, status: 'Submitted' });
+
   const newListing: FirestoreListing = {
     id: tempId,
     ticketNumber,
@@ -438,21 +478,33 @@ export const createListingDocument = async (
     status: 'Submitted',
     upvotes: 1,
     confirmedBy: [data.reporterId],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: nowMs,
+    updatedAt: nowMs,
     resolvedPhotoUrl: null,
     flagged: false,
     mergedCount: 0,
-    targetResolutionHours: data.severity === 'Critical' ? 4 : data.severity === 'High' ? 12 : 24,
+    targetResolutionHours: slaDurationHours,
+    slaDurationHours,
+    slaStartedAt: nowIso,
+    slaDeadlineAt,
+    slaStatus,
     voiceNoteTranscription: data.voiceNoteTranscription,
     timeline: [
       {
         id: 't-' + Date.now(),
         status: 'Submitted',
         timestamp: 'Just now',
-        title: 'Report Submitted & Published to Ward',
-        description: `Citizen listing published to ${data.ward}. Priority: ${data.severity}.`,
+        title: 'Report Submitted & SLA Timer Started',
+        description: `Citizen listing published to ${data.ward}. SLA target: ${slaDurationHours} hrs.`,
         actor: data.reporterName,
+      },
+      {
+        id: 't-sla-' + Date.now(),
+        status: 'Submitted',
+        timestamp: 'Just now',
+        title: 'SLA Deadline Calculated',
+        description: `${slaDurationHours} Hour SLA deadline established.`,
+        actor: 'CivicTrack SLA Engine',
       },
     ],
   };
@@ -697,15 +749,26 @@ export const resolveListingDocument = async (
   workerName: string = 'Field Officer'
 ): Promise<string> => {
   const proofUrl = await uploadListingPhoto(proofPhoto, listingId, 99);
+  const nowIso = new Date().toISOString();
+
+  const localListings = loadLocalListings();
+  const existing = localListings.find((l) => l.id === listingId);
+
+  let wasResolvedWithinSLA = true;
+  if (existing?.slaDeadlineAt) {
+    wasResolvedWithinSLA = new Date(nowIso).getTime() <= new Date(existing.slaDeadlineAt).getTime();
+  }
 
   const newTimelineEvent: TimelineEvent = {
     id: 't-res-' + Date.now(),
     status: 'Resolved',
     timestamp: 'Just now',
-    title: 'Work Completed & Photo Verified',
-    description: remarks || 'On-ground task concluded with photo proof.',
+    title: wasResolvedWithinSLA ? '✓ Resolved Within SLA Target' : 'Resolved (Exceeded SLA Target)',
+    description: remarks || 'On-ground task concluded with photo proof verification.',
     actor: workerName,
   };
+
+  const slaStatus: SlaStatus = wasResolvedWithinSLA ? 'RESOLVED_WITHIN_SLA' : 'RESOLVED_OVERDUE';
 
   if (isFirebaseConfigured && db) {
     try {
@@ -714,7 +777,9 @@ export const resolveListingDocument = async (
         status: 'Resolved',
         resolvedPhotoUrl: proofUrl,
         resolutionRemarks: remarks,
-        resolvedAt: 'Just now',
+        resolvedAt: nowIso,
+        wasResolvedWithinSLA,
+        slaStatus,
         timeline: arrayUnion(newTimelineEvent),
         updatedAt: serverTimestamp(),
       });
@@ -723,7 +788,6 @@ export const resolveListingDocument = async (
     }
   }
 
-  const localListings = loadLocalListings();
   const updated = localListings.map((l) => {
     if (l.id === listingId) {
       return {
@@ -731,7 +795,9 @@ export const resolveListingDocument = async (
         status: 'Resolved' as IssueStatus,
         resolvedPhotoUrl: proofUrl,
         resolutionRemarks: remarks,
-        resolvedAt: 'Just now',
+        resolvedAt: nowIso,
+        wasResolvedWithinSLA,
+        slaStatus,
         timeline: [...(l.timeline || []), newTimelineEvent],
         updatedAt: Date.now(),
       };

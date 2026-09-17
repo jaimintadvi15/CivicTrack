@@ -6,6 +6,7 @@ import { isListingOwner } from '../../utils/ownership';
 import { auth } from '../../lib/firebase';
 import { createRipple } from '../common/MaterialRipple';
 import { GoogleSearchHero } from './GoogleSearchHero';
+import { DeadlineTimer } from '../common/DeadlineTimer';
 import {
   Camera,
   Trophy,
@@ -531,6 +532,11 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                             {issue.assignedWorkerName}
                           </span>
                         )}
+                      </div>
+
+                      {/* SLA Compact Deadline Pill */}
+                      <div className="pt-1">
+                        <DeadlineTimer issue={issue} variant="compact" />
                       </div>
 
                       <div className="flex items-center justify-between pt-1">
