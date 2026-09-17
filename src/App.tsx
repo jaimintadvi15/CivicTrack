@@ -14,6 +14,7 @@ import { BadgeUnlockCelebration } from './components/citizen/BadgeUnlockCelebrat
 import { NotificationDrawer } from './components/citizen/NotificationDrawer';
 import { MunicipalDashboard } from './components/municipal/MunicipalDashboard';
 import { FieldWorkerApp } from './components/worker/FieldWorkerApp';
+import { TransparencyDashboard } from './components/transparency/TransparencyDashboard';
 import { CivicHeroLogo } from './components/common/CivicHeroLogo';
 import { CivicIssue } from './types';
 
@@ -127,7 +128,14 @@ const MainApp: React.FC = () => {
         }`}
       >
         <main className="flex-1 pb-20 sm:pb-16">
-          {role === 'citizen' && (
+          {role === 'citizen' && activeSection === 'transparency' && (
+            <TransparencyDashboard
+              onSelectIssue={handleSelectIssue}
+              onOpenReport={() => setIsReportModalOpen(true)}
+            />
+          )}
+
+          {role === 'citizen' && activeSection !== 'transparency' && (
             <CitizenHome
               activeSection={activeSection}
               onSelectSection={setActiveSection}

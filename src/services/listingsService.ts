@@ -793,3 +793,71 @@ export const deleteListingDocument = async (
 
   return { success: true };
 };
+
+// API Endpoint Helper: GET /api/reports/analytics
+export interface ReportsAnalyticsResponse {
+  total: number;
+  solved: number;
+  pending: number;
+  inProgress: number;
+  resolutionRate: number;
+  byLocation: Array<{ ward: string; total: number; resolved: number; pending: number; inProgress: number }>;
+  byCategory: Array<{ category: string; count: number; percentage: number }>;
+}
+
+export const getReportsAnalytics = async (locationFilter: string = 'all'): Promise<ReportsAnalyticsResponse> => {
+  const listings = loadLocalListings().filter((l) => !isPurgedListing(l) && !l.flagged);
+  const filtered = locationFilter === 'all' ? listings : listings.filter((l) => l.ward === locationFilter);
+
+  const total = filtered.length;
+  const solved = filtered.filter((l) => l.status === 'Resolved').length;
+  const inProgress = filtered.filter((l) => l.status === 'In Progress').length;
+  const pending = filtered.filter((l) => l.status === 'Submitted' || l.status === 'Acknowledged').length;
+  const resolutionRate = total > 0 ? Math.round((solved / total) * 100) : 0;
+
+  const locMap: Record<string, { ward: string; total: number; resolved: number; pending: number; inProgress: number }> = {};
+  listings.forEach((l) => {
+    const key = l.ward || 'Other Area';
+    if (!locMap[key]) locMap[key] = { ward: key, total: 0, resolved: 0, pending: 0, inProgress: 0 };
+    locMap[key].total += 1;
+    if (l.status === 'Resolved') locMap[key].resolved += 1;
+    else if (l.status === 'In Progress') locMap[key].inProgress += 1;
+    else locMap[key].pending += 1;
+  });
+
+  const categories = ['Pothole', 'Water Leak', 'Garbage', 'Streetlight', 'Road Damage', 'Drain', 'Other'];
+  const catCounts: Record<string, number> = {};
+  categories.forEach((c) => (catCounts[c] = 0));
+  filtered.forEach((l) => {
+    const cat = l.category || 'Other';
+    catCounts[cat] = (catCounts[cat] || 0) + 1;
+  });
+
+  return {
+    total,
+    solved,
+    pending,
+    inProgress,
+    resolutionRate,
+    byLocation: Object.values(locMap).sort((a, b) => b.total - a.total),
+    byCategory: categories.map((c) => ({
+      category: c,
+      count: catCounts[c] || 0,
+      percentage: total > 0 ? Math.round(((catCounts[c] || 0) / total) * 100) : 0,
+    })),
+  };
+};
+
+// API Endpoint Helper: GET /api/reports/user
+export const getUserReports = async (
+  userId: string,
+  userPhone?: string
+): Promise<CivicIssue[]> => {
+  const listings = loadLocalListings();
+  const userListings = listings.filter((l) => {
+    if (l.reporterId === userId) return true;
+    if (userPhone && l.reporterPhone && normalizePhone(userPhone) === normalizePhone(l.reporterPhone)) return true;
+    return false;
+  });
+  return userListings.map((l) => mapListingToCivicIssue(l, userId));
+};
