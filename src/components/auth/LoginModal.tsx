@@ -24,14 +24,15 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
-  const { loginWithPhone, completeCitizenOnboarding, t } = useApp();
+  const { loginWithPhone, loginWithIdAndPassword, completeCitizenOnboarding, t } = useApp();
 
   // Multi-step auth flow
-  const [step, setStep] = useState<'phone' | 'otp' | 'onboarding'>('phone');
+  const [loginRole, setLoginRole] = useState<UserRole>('citizen');
+  const [step, setStep] = useState<'phone' | 'staff_credentials' | 'otp' | 'onboarding'>('phone');
   const [phone, setPhone] = useState<string>('');
+  const [staffId, setStaffId] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [otp, setOtp] = useState<string>('');
-  const [inviteCode, setInviteCode] = useState<string>('');
-  const [showInviteInput, setShowInviteInput] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
@@ -82,6 +83,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
     }, 400);
   };
 
+  const handleStaffCredentialsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!staffId.trim() || !password.trim()) {
+      setError('Please enter both Staff ID and Password');
+      return;
+    }
+    setError('');
+    setIsLoading(true);
+
+    // Simulate API verification of ID and password
+    setTimeout(() => {
+      setIsLoading(false);
+      // In a real app, this would trigger an OTP to their registered email/phone
+      setStep('otp');
+    }, 600);
+  };
+
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp || otp.length < 4) {
@@ -102,14 +120,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
 
     setTimeout(() => {
       setIsLoading(false);
-      const res = loginWithPhone(phone, otp, inviteCode);
-      if (!res.success) {
-        setError(res.error || 'Invalid OTP code');
-        return;
-      }
-
-      if (res.isNewUser) {
-        setStep('onboarding');
+      
+      if (loginRole === 'citizen') {
+        const res = loginWithPhone(phone, otp, '');
+        if (!res.success) {
+          setError(res.error || 'Invalid OTP code');
+          return;
+        }
+        if (res.isNewUser) {
+          setStep('onboarding');
+        }
+      } else {
+        const res = loginWithPhone.bind(null) ? loginWithIdAndPassword(loginRole, staffId, otp) : { success: false, error: 'App context error' };
+        if (!res.success) {
+          setError(res.error || 'Invalid OTP code');
+        }
       }
     }, 400);
   };
@@ -123,8 +148,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
     completeCitizenOnboarding(name.trim(), ward);
   };
 
-  const fillDemoNumber = (demoPhone: string, _targetRole: UserRole) => {
-    setPhone(demoPhone);
+  const fillDemoCitizen = () => {
+    setLoginRole('citizen');
+    setStep('phone');
+    setPhone('9876543210');
+    setError('');
+  };
+
+  const fillDemoStaff = (role: 'municipal' | 'worker', id: string, pass: string) => {
+    setLoginRole(role);
+    setStep('staff_credentials');
+    setStaffId(id);
+    setPassword(pass);
     setError('');
   };
 
@@ -160,19 +195,51 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
       <div className="w-full max-w-md bg-white border border-[#DADCE0] rounded shadow-elevation-8 p-6 sm:p-8 text-[#202124] relative overflow-hidden">
         <div className="google-accent-bar" />
         <div id="recaptcha-container" />
-        
-        {/* STEP 1: PHONE NUMBER */}
-        {step === 'phone' && (
-          <div className="pt-2">
+
+        {/* LOGIN PORTAL TABS */}
+        {(step === 'phone' || step === 'staff_credentials') && (
+          <div className="mb-6">
+            <h1 className="text-xl font-bold text-center text-[#202124] mb-4">
+              Select Portal to Login
+            </h1>
+            <div className="grid grid-cols-3 gap-2 bg-[#F1F3F4] p-1.5 rounded-xl">
+              <button
+                onClick={() => { setLoginRole('citizen'); setStep('phone'); setError(''); }}
+                className={`py-2 px-1 text-xs font-semibold rounded-lg flex flex-col items-center justify-center space-y-1 transition-all ${
+                  loginRole === 'citizen' ? 'bg-white text-[#1A73E8] shadow-sm' : 'text-[#5F6368] hover:text-[#202124]'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Citizen</span>
+              </button>
+              <button
+                onClick={() => { setLoginRole('municipal'); setStep('staff_credentials'); setError(''); }}
+                className={`py-2 px-1 text-xs font-semibold rounded-lg flex flex-col items-center justify-center space-y-1 transition-all ${
+                  loginRole === 'municipal' ? 'bg-white text-[#1A73E8] shadow-sm' : 'text-[#5F6368] hover:text-[#202124]'
+                }`}
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Municipal</span>
+              </button>
+              <button
+                onClick={() => { setLoginRole('worker'); setStep('staff_credentials'); setError(''); }}
+                className={`py-2 px-1 text-xs font-semibold rounded-lg flex flex-col items-center justify-center space-y-1 transition-all ${
+                  loginRole === 'worker' ? 'bg-white text-[#1A73E8] shadow-sm' : 'text-[#5F6368] hover:text-[#202124]'
+                }`}
+              >
+                <HardHat className="w-4 h-4" />
+                <span>Field Ops</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 1: CITIZEN PHONE NUMBER */}
+        {step === 'phone' && loginRole === 'citizen' && (
+          <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded bg-[#E8F0FE] text-[#1A73E8] mb-3">
-                <Smartphone className="w-6 h-6" />
-              </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-normal text-[#202124]">
-                {t.loginTitle || 'Sign In to Civic Hero'}
-              </h1>
-              <p className="text-xs text-[#5F6368] mt-1 max-w-xs mx-auto">
-                {t.loginSubtitle || 'Enter your mobile number to report issues, track resolutions, or access staff portals.'}
+              <p className="text-xs text-[#5F6368] max-w-xs mx-auto">
+                {t.loginSubtitle || 'Enter your mobile number to report issues and track resolutions.'}
               </p>
             </div>
 
@@ -196,33 +263,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                 </div>
               </div>
 
-              {/* Optional Invite Code Toggle */}
-              <div>
-                {!showInviteInput ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowInviteInput(true)}
-                    className="text-xs text-[#1A73E8] hover:underline font-medium flex items-center space-x-1"
-                  >
-                    <Building2 className="w-3.5 h-3.5" />
-                    <span>Have a Municipal Staff / Worker Invite Code?</span>
-                  </button>
-                ) : (
-                  <div className="space-y-1">
-                    <label className="block text-xs font-medium uppercase tracking-wider text-[#5F6368]">
-                      Staff / Worker Invite Code (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                      placeholder="e.g. MUNI-STAFF-2026"
-                      className="w-full bg-white border border-[#DADCE0] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] rounded px-3.5 py-2.5 text-sm text-[#202124] font-mono uppercase focus:outline-none"
-                    />
-                  </div>
-                )}
-              </div>
-
               {error && (
                 <div className="p-3 bg-[#FCE8E6] border border-[#FAD2CF] rounded text-xs font-medium text-[#C5221F] text-center">
                   {error}
@@ -240,8 +280,69 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
+          </div>
+        )}
 
-            {/* Quick Demo Credentials */}
+        {/* STEP 1: STAFF CREDENTIALS */}
+        {step === 'staff_credentials' && (
+          <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="text-center mb-6">
+              <p className="text-xs text-[#5F6368] max-w-xs mx-auto">
+                {loginRole === 'municipal' 
+                  ? 'Sign in with your Municipal HQ staff credentials.'
+                  : 'Sign in with your Field Operations staff credentials.'}
+              </p>
+            </div>
+
+            <form onSubmit={handleStaffCredentialsSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-[#5F6368] mb-1.5">
+                  Staff ID / Private ID
+                </label>
+                <input
+                  type="text"
+                  value={staffId}
+                  onChange={(e) => setStaffId(e.target.value.toUpperCase())}
+                  placeholder={loginRole === 'municipal' ? 'e.g. MUNI-1042' : 'e.g. BBMP-ENG-45'}
+                  className="w-full bg-white border border-[#DADCE0] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] rounded px-3.5 py-2.5 text-sm font-mono text-[#202124] placeholder-slate-400 focus:outline-none transition-colors uppercase"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-[#5F6368] mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full bg-white border border-[#DADCE0] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] rounded px-3.5 py-2.5 text-sm text-[#202124] placeholder-slate-400 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 bg-[#FCE8E6] border border-[#FAD2CF] rounded text-xs font-medium text-[#C5221F] text-center">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading || !staffId || !password}
+                onClick={(e) => createRipple(e, 'rgba(255, 255, 255, 0.3)')}
+                className="w-full bg-[#4285F4] hover:bg-[#1A73E8] text-white font-medium uppercase tracking-wider text-xs sm:text-sm py-3 px-4 rounded shadow-elevation-2 hover:shadow-elevation-4 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all ripple-surface"
+              >
+                <span>{isLoading ? 'Authenticating...' : 'Continue to Verification'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Quick Demo Credentials */}
+        {(step === 'phone' || step === 'staff_credentials') && (
             <div className="mt-6 pt-5 border-t border-[#DADCE0]">
               <p className="text-[11px] font-medium uppercase tracking-wider text-[#5F6368] text-center mb-2.5">
                 Quick Demo Auto-Fill
@@ -252,7 +353,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                   type="button"
                   onClick={(e) => {
                     createRipple(e, 'rgba(66, 133, 244, 0.15)');
-                    fillDemoNumber('9876543210', 'citizen');
+                    fillDemoCitizen();
                   }}
                   className="w-full bg-[#F8F9FA] hover:bg-[#E8F0FE] border border-[#DADCE0] p-2.5 rounded flex items-center justify-between text-left transition-colors ripple-surface"
                 >
@@ -276,19 +377,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                   type="button"
                   onClick={(e) => {
                     createRipple(e, 'rgba(66, 133, 244, 0.15)');
-                    fillDemoNumber('9123456789', 'municipal');
+                    fillDemoStaff('municipal', 'MUNI-987', 'admin123');
                   }}
                   className="w-full bg-[#F8F9FA] hover:bg-[#E8F0FE] border border-[#DADCE0] p-2.5 rounded flex items-center justify-between text-left transition-colors ripple-surface"
                 >
                   <div className="flex items-center space-x-2.5">
                     <div className="w-7 h-7 rounded bg-[#E8F0FE] text-[#1A73E8] flex items-center justify-center">
-                      <LayoutDashboard className="w-4 h-4" />
+                      <Building2 className="w-4 h-4" />
                     </div>
                     <div>
                       <div className="text-xs font-medium text-[#202124]">
                         Municipal Staff — Dr. Sunita Rao
                       </div>
-                      <div className="text-[10px] text-[#5F6368]">+91 91234 56789 (HQ Triage)</div>
+                      <div className="text-[10px] text-[#5F6368]">ID: MUNI-987 • Password: admin123</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-medium bg-[#E8F0FE] text-[#1A73E8] px-2 py-0.5 rounded">
@@ -300,7 +401,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                   type="button"
                   onClick={(e) => {
                     createRipple(e, 'rgba(251, 188, 5, 0.15)');
-                    fillDemoNumber('9845011223', 'worker');
+                    fillDemoStaff('worker', 'WK-445', 'worker123');
                   }}
                   className="w-full bg-[#F8F9FA] hover:bg-[#FEF7E0] border border-[#DADCE0] p-2.5 rounded flex items-center justify-between text-left transition-colors ripple-surface"
                 >
@@ -312,7 +413,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                       <div className="text-xs font-medium text-[#202124]">
                         Field Worker — Ramesh Kumar
                       </div>
-                      <div className="text-[10px] text-[#5F6368]">+91 98450 11223 (Field Ops)</div>
+                      <div className="text-[10px] text-[#5F6368]">ID: WK-445 • Password: worker123</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-medium bg-[#FEF7E0] text-[#B06000] px-2 py-0.5 rounded">
@@ -321,7 +422,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                 </button>
               </div>
             </div>
-          </div>
         )}
 
         {/* STEP 2: OTP VERIFICATION */}
@@ -335,7 +435,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
                 {t.enterOtp || 'Enter OTP Code'}
               </h2>
               <p className="text-xs text-[#5F6368] mt-1">
-                Sent verification code to <span className="text-[#202124] font-medium">+91 {phone}</span>
+                Sent verification code to <span className="text-[#202124] font-medium">
+                  {loginRole === 'citizen' ? `+91 ${phone}` : 'your registered contact'}
+                </span>
               </p>
             </div>
 

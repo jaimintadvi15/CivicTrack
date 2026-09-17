@@ -2,22 +2,22 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { isListingOwner } from '../../utils/ownership';
 import { auth } from '../../lib/firebase';
-import { UserRole } from '../../types';
 import { createRipple } from './MaterialRipple';
 import {
   Home,
   FileText,
   Compass,
   Trophy,
-  LayoutDashboard,
-  HardHat,
   Plus,
   ChevronLeft,
   ChevronRight,
   Globe,
   LogOut,
+<<<<<<< HEAD
   Users,
   BarChart3,
+=======
+>>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
 } from 'lucide-react';
 import { CivicHeroLogo } from './CivicHeroLogo';
 
@@ -73,17 +73,21 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         count: communityCount,
       },
       {
+<<<<<<< HEAD
         id: 'transparency',
         label: 'Transparency Dashboard',
         icon: BarChart3,
       },
       {
+=======
+>>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
         id: 'leaderboard',
         label: 'Leaderboard & XP',
         icon: Trophy,
         count: `${currentUser.points} XP`,
       },
     ];
+<<<<<<< HEAD
 
   const staffNavItems: {
     role: UserRole;
@@ -106,6 +110,10 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         icon: HardHat,
       },
     ];
+=======
+
+
+>>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
 
   return (
     <>
@@ -216,6 +224,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             </nav>
           )}
 
+<<<<<<< HEAD
           {/* 3. Staff / Portals Section */}
           <div className="pt-2 border-t border-[#DADCE0]">
             {!isCollapsed && (
@@ -254,6 +263,9 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               })}
             </nav>
           </div>
+=======
+        {/* Removed Staff / Portals Section */}
+>>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
         </div>
 
         {/* 4. Rail Bottom Footer: Language, Collapse Toggle, Logout */}
