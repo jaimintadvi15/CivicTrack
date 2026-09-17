@@ -13,11 +13,7 @@ import {
   ChevronRight,
   Globe,
   LogOut,
-<<<<<<< HEAD
-  Users,
   BarChart3,
-=======
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
 } from 'lucide-react';
 import { CivicHeroLogo } from './CivicHeroLogo';
 
@@ -73,47 +69,17 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         count: communityCount,
       },
       {
-<<<<<<< HEAD
         id: 'transparency',
         label: 'Transparency Dashboard',
         icon: BarChart3,
       },
       {
-=======
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
         id: 'leaderboard',
         label: 'Leaderboard & XP',
         icon: Trophy,
         count: `${currentUser.points} XP`,
       },
     ];
-<<<<<<< HEAD
-
-  const staffNavItems: {
-    role: UserRole;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }[] = [
-      {
-        role: 'citizen',
-        label: 'Citizen Portal',
-        icon: Users,
-      },
-      {
-        role: 'municipal',
-        label: 'Municipal HQ',
-        icon: LayoutDashboard,
-      },
-      {
-        role: 'worker',
-        label: 'Field Ops',
-        icon: HardHat,
-      },
-    ];
-=======
-
-
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
 
   return (
     <>
@@ -223,49 +189,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               })}
             </nav>
           )}
-
-<<<<<<< HEAD
-          {/* 3. Staff / Portals Section */}
-          <div className="pt-2 border-t border-[#DADCE0]">
-            {!isCollapsed && (
-              <span className="px-3 text-[11px] font-medium uppercase tracking-wider text-[#5F6368] block mb-1">
-                Portals
-              </span>
-            )}
-            <nav className="space-y-1" aria-label="Portal roles">
-              {staffNavItems.map((item) => {
-                const isActive = role === item.role;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.role}
-                    onClick={(e) => {
-                      createRipple(e, 'rgba(66, 133, 244, 0.15)');
-                      setRole(item.role);
-                    }}
-                    className={`w-full flex items-center rounded-full transition-colors text-sm font-medium ripple-surface relative group ${isCollapsed
-                        ? 'justify-center w-12 h-12 mx-auto'
-                        : 'justify-start space-x-3 px-4 py-2.5'
-                      } ${isActive
-                        ? 'bg-[#E8F0FE] text-[#1A73E8] font-semibold'
-                        : 'text-[#202124] hover:bg-[#F1F3F4]'
-                      }`}
-                    title={item.label}
-                    aria-label={item.label}
-                  >
-                    <Icon
-                      className={`w-5 h-5 shrink-0 ${isActive ? 'text-[#1A73E8]' : 'text-[#5F6368] group-hover:text-[#202124]'
-                        }`}
-                    />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-=======
-        {/* Removed Staff / Portals Section */}
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
         </div>
 
         {/* 4. Rail Bottom Footer: Language, Collapse Toggle, Logout */}
