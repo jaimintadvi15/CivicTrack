@@ -105,18 +105,25 @@ export const CivicHeroIcon: React.FC<{
         fill={personFill}
       />
 
-      {/* Very Subtle Electric Thunder Spark Accent */}
+      {/* Prominent Electric Thunder Spark Accent */}
       {showThunder && !monochrome && (
         <g className="animate-thunder-spark">
-          {/* Glowing Electric Outer Shadow */}
+          {/* Outer Border & Contrast Layer */}
           <path
-            d="M 45 3 L 39.5 12 L 43.5 12 L 40.5 20.5 L 48 10.5 L 44 10.5 Z"
-            fill="#FBBC05"
-            opacity="0.95"
+            d="M 46 2 L 39 13 L 44 13 L 40.5 23 L 49.5 10.5 L 44.5 10.5 Z"
+            fill="#D97706"
+            stroke="#FFFFFF"
+            strokeWidth="1.4"
+            strokeLinejoin="round"
           />
-          {/* Inner High Voltage White Core */}
+          {/* Main Golden Thunder Body */}
           <path
-            d="M 45 4 L 40.5 11.5 L 43.2 11.5 L 41.2 18.5 L 47 10.5 L 44 10.5 Z"
+            d="M 46 3 L 40 13 L 44 13 L 41 21.5 L 48.5 11 L 44.5 11 Z"
+            fill="#FBBC05"
+          />
+          {/* Inner White High-Voltage Core */}
+          <path
+            d="M 45.8 4.5 L 41.2 12.2 L 43.5 12.2 L 41.8 19 L 47.2 11.2 L 44.5 11.2 Z"
             fill="#FFFFFF"
             opacity="0.9"
           />

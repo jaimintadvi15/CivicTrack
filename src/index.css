@@ -305,42 +305,42 @@
   border-color: #BDC1C6;
 }
 
-/* Very subtle thunder flash & electric shimmer effect */
+/* Electric thunder spark animation: 100% visible continuously with energetic flashes */
 @keyframes thunder-spark-flash {
   0%, 100% {
-    opacity: 0.65;
-    transform: scale(0.95) rotate(-2deg);
-    filter: drop-shadow(0 0 2px rgba(251, 188, 5, 0.4));
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 3px rgba(251, 188, 5, 0.7));
   }
   48% {
-    opacity: 0.65;
-    transform: scale(0.95) rotate(-2deg);
-    filter: drop-shadow(0 0 2px rgba(251, 188, 5, 0.4));
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 3px rgba(251, 188, 5, 0.7));
   }
   50% {
     opacity: 1;
-    transform: scale(1.12) rotate(3deg);
-    filter: drop-shadow(0 0 8px rgba(251, 188, 5, 0.95)) drop-shadow(0 0 12px rgba(66, 133, 244, 0.8));
+    transform: scale(1.22) rotate(6deg);
+    filter: drop-shadow(0 0 10px rgba(251, 188, 5, 1)) drop-shadow(0 0 16px rgba(66, 133, 244, 0.9));
   }
   52% {
-    opacity: 0.75;
-    transform: scale(1.02) rotate(-1deg);
-    filter: drop-shadow(0 0 4px rgba(251, 188, 5, 0.6));
+    opacity: 1;
+    transform: scale(1.06) rotate(-2deg);
+    filter: drop-shadow(0 0 5px rgba(251, 188, 5, 0.8));
   }
   54% {
     opacity: 1;
-    transform: scale(1.15) rotate(4deg);
-    filter: drop-shadow(0 0 10px rgba(251, 188, 5, 1));
+    transform: scale(1.25) rotate(7deg);
+    filter: drop-shadow(0 0 14px rgba(251, 188, 5, 1)) drop-shadow(0 0 20px rgba(251, 188, 5, 0.8));
   }
   58%, 99% {
-    opacity: 0.65;
-    transform: scale(0.95) rotate(-2deg);
-    filter: drop-shadow(0 0 2px rgba(251, 188, 5, 0.4));
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 3px rgba(251, 188, 5, 0.7));
   }
 }
 
 .animate-thunder-spark {
-  animation: thunder-spark-flash 3.8s ease-in-out infinite;
+  animation: thunder-spark-flash 3.2s ease-in-out infinite;
   transform-origin: 44px 12px;
 }
 
