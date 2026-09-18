@@ -113,32 +113,35 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
       </div>
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* KPI Analytics Overview */}
         <AnalyticsOverview />
 
         {/* Dynamic Views */}
         {viewMode === 'split' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-full min-w-0">
-            {/* Left: Interactive Map (5 Cols) */}
-            <div className="lg:col-span-5 min-w-0 max-w-full space-y-3">
+          <div className="w-full space-y-6 min-w-0 max-w-full">
+            {/* Top: Live Geographic Incident Heatmap */}
+            <div className="w-full min-w-0 max-w-full space-y-2.5 bg-white rounded-xl border border-[#DADCE0] p-4 shadow-elevation-1">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#202124] flex items-center space-x-1.5">
                   <MapIcon className="w-4 h-4 text-[#4285F4]" />
-                  <span>{t.densityHeatmap}</span>
+                  <span>{t.densityHeatmap || 'Live Incident Heatmap & Citywide Telemetry'}</span>
                 </h3>
+                <span className="text-xs text-[#5F6368] hidden sm:inline">
+                  Interactive GIS View • Click any cluster pin to inspect
+                </span>
               </div>
               <ComplaintMap
                 onSelectIssue={(issue) => setSelectedIssue(issue)}
                 onAssignWorker={(issue) => setAssigningIssue(issue)}
                 selectedCategory={categoryFilter}
                 selectedSeverity={severityFilter}
-                heightClassName="h-[380px] sm:h-[420px] lg:h-[460px]"
+                heightClassName="h-[300px] sm:h-[340px] lg:h-[380px]"
               />
             </div>
 
-            {/* Right: Filterable Complaints Table (7 Cols) */}
-            <div className="lg:col-span-7 min-w-0 max-w-full space-y-3">
+            {/* Bottom: Comprehensive Filterable Complaints Table */}
+            <div className="w-full min-w-0 max-w-full space-y-2.5">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#202124] flex items-center space-x-1.5">
                   <TableIcon className="w-4 h-4 text-[#4285F4]" />
