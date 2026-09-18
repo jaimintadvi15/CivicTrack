@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap"
     rel="stylesheet">
   <title>Urban Fix — Municipal Issue Detection & Resolution</title>
   <meta name="description"
@@ -21,14 +21,88 @@
 
 <body>
   <div id="root">
-    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-      <div style="width: 38px; height: 38px; border: 3px solid #E8F0FE; border-top: 3px solid #4285F4; border-radius: 50%; animation: uf-spin 0.8s linear infinite; margin-bottom: 14px;"></div>
-      <div style="font-size: 14px; font-weight: 600; color: #3C4043; letter-spacing: 0.3px;">Urban Fix</div>
-      <div style="font-size: 12px; color: #70757A; margin-top: 4px;">Loading civic platform...</div>
+    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #F8F9FA; font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      
+      <!-- Loading Container with Ambient Glowing Aura -->
+      <div style="position: relative; width: 88px; height: 88px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        
+        <!-- Ambient Glowing Aura -->
+        <div style="position: absolute; inset: -12px; border-radius: 50%; background: radial-gradient(circle, rgba(66, 133, 244, 0.3) 0%, rgba(234, 67, 53, 0.2) 40%, rgba(251, 188, 5, 0.15) 70%, transparent 100%); filter: blur(12px); animation: uf-aura-pulse 2.2s ease-in-out infinite alternate;"></div>
+        
+        <!-- Outer Glowing Multi-Color Spinning Ring -->
+        <div style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #4285F4, #EA4335, #FBBC05, #34A853, #4285F4); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px)); animation: uf-spin 1.2s linear infinite; filter: drop-shadow(0 0 8px rgba(66, 133, 244, 0.55));"></div>
+        
+        <!-- Inner Counter-Rotating Subtle Ring -->
+        <div style="position: absolute; inset: 5px; border-radius: 50%; border: 1.5px dashed rgba(66, 133, 244, 0.4); animation: uf-counter-spin 4s linear infinite;"></div>
+        
+        <!-- Urban Fix Brand Logo inside the Moving Circle -->
+        <div style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; animation: uf-logo-pulse 2s ease-in-out infinite alternate;">
+          <svg viewBox="0 0 64 64" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));">
+            <!-- 4-Color Base Accent: Blue, Red, Yellow, Green -->
+            <rect x="13" y="53" width="6" height="2.5" rx="1.25" fill="#4285F4" />
+            <rect x="21" y="53" width="6" height="2.5" rx="1.25" fill="#EA4335" />
+            <rect x="29" y="53" width="6" height="2.5" rx="1.25" fill="#FBBC05" />
+            <rect x="37" y="53" width="6" height="2.5" rx="1.25" fill="#34A853" />
+
+            <!-- Eco Leaf / Swoosh Accent (Google Green) -->
+            <path d="M33 40 C37 35 46.5 25.5 49.5 12 C41 13.5 34 22 31 29 C29.5 32.5 31.5 37.5 33 40 Z" fill="#34A853" />
+            <path d="M33.5 38.5 C36.5 32 43 23 48.5 14" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.65" />
+
+            <!-- Pin Body (Google Blue) -->
+            <path d="M28 7 C36.284 7 43 13.716 43 22 C43 31.2 34 40.5 28 49 C22 40.5 13 31.2 13 22 C13 13.716 19.716 7 28 7 Z" fill="#4285F4" stroke="#1A73E8" stroke-width="1.2" stroke-linejoin="round" />
+
+            <!-- Person Silhouette (Inside Pin, High-Contrast White) -->
+            <circle cx="28" cy="17.5" r="3.75" fill="#FFFFFF" />
+            <path d="M20.5 29.5 C21 25.2 24.2 23.5 28 23.5 C31.8 23.5 35 25.2 35.5 29.5 C33.4 32 28 33 28 33 C28 33 22.6 32 20.5 29.5 Z" fill="#FFFFFF" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div style="font-size: 16px; font-weight: 700; color: #202124; letter-spacing: 0.6px; display: flex; align-items: center; gap: 4px;">
+        <span>URBAN</span>
+        <span style="color: #4285F4;">FIX</span>
+      </div>
+      
+      <!-- Subtitle with Animated Dots -->
+      <div style="font-size: 13px; font-weight: 500; color: #5F6368; margin-top: 6px; display: flex; align-items: center; gap: 2px;">
+        <span>Loading civic platform</span>
+        <span class="uf-dot-1">.</span>
+        <span class="uf-dot-2">.</span>
+        <span class="uf-dot-3">.</span>
+      </div>
     </div>
   </div>
+
   <style>
-    @keyframes uf-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes uf-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes uf-counter-spin {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes uf-aura-pulse {
+      0% { opacity: 0.35; transform: scale(0.92); }
+      100% { opacity: 0.85; transform: scale(1.12); }
+    }
+    @keyframes uf-logo-pulse {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.06); }
+    }
+    .uf-dot-1, .uf-dot-2, .uf-dot-3 {
+      animation: uf-dots 1.4s infinite ease-in-out;
+      font-weight: 700;
+      color: #4285F4;
+    }
+    .uf-dot-1 { animation-delay: 0s; }
+    .uf-dot-2 { animation-delay: 0.2s; }
+    .uf-dot-3 { animation-delay: 0.4s; }
+    @keyframes uf-dots {
+      0%, 80%, 100% { opacity: 0; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-3px); }
+    }
   </style>
   <script type="module" src="/src/main.tsx"></script>
 </body>
