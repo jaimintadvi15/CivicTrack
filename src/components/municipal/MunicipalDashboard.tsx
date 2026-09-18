@@ -13,14 +13,31 @@ import {
   Table as TableIcon,
 } from 'lucide-react';
 
-export const MunicipalDashboard: React.FC = () => {
+import { NavSection } from '../common/NavigationRail';
+
+interface MunicipalDashboardProps {
+  activeSection?: NavSection;
+}
+
+export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSection }) => {
   const { t } = useApp();
-  const [viewMode, setViewMode] = useState<'map' | 'table' | 'split'>('split');
+  const [viewMode, setViewMode] = React.useState<'map' | 'table' | 'split'>('split');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
 
   const [selectedIssue, setSelectedIssue] = useState<CivicIssue | null>(null);
   const [assigningIssue, setAssigningIssue] = useState<CivicIssue | null>(null);
+
+  React.useEffect(() => {
+    if (activeSection === 'queue') {
+      setViewMode('table');
+    } else if (activeSection === 'heatmap') {
+      setViewMode('map');
+    } else if (activeSection === 'dispatch' || activeSection === 'analytics') {
+      setViewMode('split');
+    }
+  }, [activeSection]);
+
 
   return (
     <div className="w-full bg-[#F8F9FA] text-[#202124] pb-12 font-sans">

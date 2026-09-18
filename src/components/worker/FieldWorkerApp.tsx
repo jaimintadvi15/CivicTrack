@@ -15,12 +15,29 @@ import {
   Star,
   Check,
 } from 'lucide-react';
+import { NavSection } from '../common/NavigationRail';
 
-export const FieldWorkerApp: React.FC = () => {
+
+interface FieldWorkerAppProps {
+  activeSection?: NavSection;
+}
+
+export const FieldWorkerApp: React.FC<FieldWorkerAppProps> = ({ activeSection }) => {
   const { issues, updateIssueStatus, fieldWorkers, t } = useApp();
   const [selectedIssueForResolve, setSelectedIssueForResolve] = useState<CivicIssue | null>(null);
   const [selectedIssueForDetail, setSelectedIssueForDetail] = useState<CivicIssue | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'in_progress' | 'resolved'>('all');
+
+  React.useEffect(() => {
+    if (activeSection === 'assigned') {
+      setActiveFilter('all');
+    } else if (activeSection === 'in-progress') {
+      setActiveFilter('in_progress');
+    } else if (activeSection === 'completed') {
+      setActiveFilter('resolved');
+    }
+  }, [activeSection]);
+
 
   const currentWorker = fieldWorkers[0]; // Ramesh Kumar by default
 
