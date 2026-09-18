@@ -14,7 +14,6 @@ import {
   Globe,
   LogOut,
   BarChart3,
-  LayoutDashboard,
   CheckCircle2,
   Clock,
   Map as MapIcon,
@@ -23,7 +22,6 @@ import { CivicHeroLogo } from './CivicHeroLogo';
 import { UserRole } from '../../types';
 
 export type NavSection =
-
   | 'home'
   | 'my-reports'
   | 'community'
@@ -31,7 +29,6 @@ export type NavSection =
   | 'leaderboard'
   | 'queue'
   | 'heatmap'
-  | 'dispatch'
   | 'analytics'
   | 'assigned'
   | 'in-progress'
@@ -110,6 +107,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
     },
   ];
 
+  // Municipal HQ navigation items
   const municipalNavItems: NavItem[] = [
     {
       id: 'queue',
@@ -121,11 +119,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       id: 'heatmap',
       label: 'Density Heatmap',
       icon: MapIcon,
-    },
-    {
-      id: 'dispatch',
-      label: 'Worker Dispatch',
-      icon: LayoutDashboard,
     },
     {
       id: 'analytics',

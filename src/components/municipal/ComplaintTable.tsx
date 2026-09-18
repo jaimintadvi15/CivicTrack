@@ -151,100 +151,117 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
+        <div className="flex flex-wrap items-center gap-2.5 pt-1">
           {/* Status */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
-          >
-            <option value="all">All Statuses</option>
-            <option value="Submitted">Submitted</option>
-            <option value="Acknowledged">Acknowledged</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-          </select>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-medium text-[#5F6368]">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Acknowledged">Acknowledged</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
 
           {/* SLA Filter */}
-          <select
-            value={slaFilter}
-            onChange={(e) => setSlaFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
-          >
-            <option value="all">All SLA States</option>
-            <option value="ON_TRACK">On Track</option>
-            <option value="DUE_SOON">Due Soon (&lt; 24h)</option>
-            <option value="ESCALATED">Auto Escalated / Overdue</option>
-            <option value="RESOLVED">Resolved Within SLA</option>
-          </select>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-medium text-[#5F6368]">SLA:</span>
+            <select
+              value={slaFilter}
+              onChange={(e) => setSlaFilter(e.target.value)}
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
+            >
+              <option value="all">All SLA States</option>
+              <option value="ON_TRACK">On Track</option>
+              <option value="DUE_SOON">Due Soon (&lt; 24h)</option>
+              <option value="ESCALATED">Auto Escalated / Overdue</option>
+              <option value="RESOLVED">Resolved Within SLA</option>
+            </select>
+          </div>
 
           {/* Category */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
-          >
-            <option value="all">All Categories</option>
-            <option value="Garbage">Garbage & Waste</option>
-            <option value="Pothole">Pothole</option>
-            <option value="Water Leak">Water Leak</option>
-            <option value="Streetlight">Streetlight</option>
-            <option value="Road Damage">Road Damage</option>
-            <option value="Drain">Drain / Sewage</option>
-          </select>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-medium text-[#5F6368]">Category:</span>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
+            >
+              <option value="all">All Categories</option>
+              <option value="Garbage">Garbage & Waste</option>
+              <option value="Pothole">Pothole</option>
+              <option value="Water Leak">Water Leak</option>
+              <option value="Streetlight">Streetlight</option>
+              <option value="Road Damage">Road Damage</option>
+              <option value="Drain">Drain / Sewage</option>
+            </select>
+          </div>
 
           {/* Severity */}
-          <select
-            value={severityFilter}
-            onChange={(e) => setSeverityFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
-          >
-            <option value="all">All Priorities</option>
-            <option value="Critical">Critical</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </select>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-medium text-[#5F6368]">Priority:</span>
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
+            >
+              <option value="all">All Priorities</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
 
           {/* Ward */}
-          <select
-            value={wardFilter}
-            onChange={(e) => setWardFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
-          >
-            <option value="all">All Wards</option>
-            {wards.map((w) => (
-              <option key={w} value={w}>
-                {w}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-medium text-[#5F6368]">Ward:</span>
+            <select
+              value={wardFilter}
+              onChange={(e) => setWardFilter(e.target.value)}
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
+            >
+              <option value="all">All Wards</option>
+              {wards.map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <span className="text-[11px] text-[#5F6368] ml-auto font-medium shrink-0">
-            Showing {sorted.length} of {issues.length} complaints
-          </span>
+          <div className="ml-auto flex items-center shrink-0">
+            <span className="text-[11px] text-[#5F6368] font-medium bg-gray-100 px-2.5 py-1 rounded-full border border-gray-200">
+              Showing <strong className="text-[#202124]">{sorted.length}</strong> of {issues.length} complaints
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Responsive Horizontal Scroll Table Container */}
       <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full table-auto text-left text-xs text-[#5F6368] min-w-[720px]">
+        <table className="w-full table-auto text-left text-xs text-[#5F6368] min-w-[1020px]">
           <thead className="bg-[#FAFAFA] text-[#5F6368] font-medium uppercase text-[10px] tracking-wider border-b border-[#DADCE0]">
             <tr>
-              <th className="py-3 px-4 min-w-[150px] whitespace-nowrap">Ticket & Photo</th>
-              <th className="py-3 px-4 min-w-[180px]">Category / Issue</th>
-              <th className="py-3 px-4 min-w-[140px]">Ward Location</th>
-              <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Severity</th>
-              <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Status</th>
-              <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">SLA / Deadline</th>
-              <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Assigned Worker</th>
-              <th className="py-3 px-4 min-w-[90px] text-right whitespace-nowrap">Actions</th>
+              <th className="py-3 px-4 w-[170px] min-w-[160px] whitespace-nowrap">Ticket & Photo</th>
+              <th className="py-3 px-4 min-w-[220px]">Category & Description</th>
+              <th className="py-3 px-4 min-w-[170px]">Ward & Location</th>
+              <th className="py-3 px-4 w-[110px] min-w-[110px] text-center whitespace-nowrap">Severity</th>
+              <th className="py-3 px-4 w-[120px] min-w-[120px] text-center whitespace-nowrap">Status</th>
+              <th className="py-3 px-4 w-[140px] min-w-[140px] whitespace-nowrap">SLA / Deadline</th>
+              <th className="py-3 px-4 w-[150px] min-w-[140px] whitespace-nowrap">Assigned Officer</th>
+              <th className="py-3 px-4 w-[110px] min-w-[100px] text-right whitespace-nowrap pr-4">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DADCE0]">
             {paginatedIssues.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-[#5F6368]">
+                <td colSpan={8} className="py-12 text-center text-[#5F6368]">
                   No matching complaints found.
                 </td>
               </tr>
@@ -256,12 +273,12 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                   onClick={() => onSelectIssue(issue)}
                 >
                   {/* Photo & Ticket */}
-                  <td className="py-3 px-4 min-w-[150px]">
+                  <td className="py-3 px-4 w-[170px] min-w-[160px] whitespace-nowrap">
                     <div className="flex items-center space-x-2.5">
                       <img
                         src={issue.photoUrl}
                         alt={issue.title}
-                        className="w-10 h-10 rounded-lg object-cover border border-[#DADCE0] flex-shrink-0"
+                        className="w-10 h-10 rounded-lg object-cover border border-[#DADCE0] flex-shrink-0 shadow-xs"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const fallback = getAssetUrl('issues/garbage.jpg');
@@ -271,44 +288,50 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                         }}
                       />
                       <div>
-                        <span className="font-mono font-medium text-[#202124] block">
+                        <span className="font-mono font-bold text-xs text-[#1A73E8] block whitespace-nowrap">
                           #{issue.ticketNumber}
                         </span>
-                        <span className="text-[10px] text-[#5F6368]">{issue.createdAt}</span>
+                        <span className="text-[10px] text-[#5F6368] block whitespace-nowrap">{issue.createdAt}</span>
                       </div>
                     </div>
                   </td>
 
                   {/* Title & Category */}
-                  <td className="py-3 px-4 min-w-[180px]">
-                    <div className="max-w-xs">
-                      <span className="text-[10px] font-medium text-[#1A73E8] bg-[#E8F0FE] px-1.5 py-0.5 rounded border border-[#D2E3FC] uppercase tracking-wide">
-                        {t.categories[issue.category]}
+                  <td className="py-3 px-4 min-w-[220px] max-w-[300px]">
+                    <div>
+                      <span className="text-[10px] font-semibold text-[#1A73E8] bg-[#E8F0FE] px-2 py-0.5 rounded border border-[#D2E3FC] uppercase tracking-wide inline-block mb-0.5">
+                        {t.categories[issue.category] || issue.category}
                       </span>
-                      <h5 className="font-medium text-[#202124] mt-0.5 truncate">{issue.title}</h5>
-                      <span className="text-[10px] text-[#5F6368] flex items-center gap-1 mt-0.5">
-                        <ThumbsUp className="w-2.5 h-2.5 text-[#1A73E8]" /> {issue.upvotes} upvotes
-                        {issue.mergedCount > 0 && ` • +${issue.mergedCount} merged`}
+                      <h5 className="font-medium text-[#202124] text-xs truncate block" title={issue.title}>
+                        {issue.title}
+                      </h5>
+                      <span className="text-[10px] text-[#5F6368] flex items-center gap-1.5 mt-0.5">
+                        <span className="inline-flex items-center gap-1 text-[#1A73E8] font-medium">
+                          <ThumbsUp className="w-3 h-3" /> {issue.upvotes}
+                        </span>
+                        {issue.mergedCount > 0 && (
+                          <span className="text-gray-400">• +{issue.mergedCount} merged</span>
+                        )}
                       </span>
                     </div>
                   </td>
 
                   {/* Location */}
-                  <td className="py-3 px-4 min-w-[140px]">
-                    <div className="max-w-[180px]">
-                      <span className="font-medium text-[#202124] text-[11px] block truncate">
+                  <td className="py-3 px-4 min-w-[170px] max-w-[240px]">
+                    <div>
+                      <span className="font-semibold text-[#202124] text-xs block truncate" title={issue.location.ward}>
                         {issue.location.ward}
                       </span>
-                      <span className="text-[10px] text-[#5F6368] truncate block">
+                      <span className="text-[10px] text-[#5F6368] truncate block mt-0.5" title={issue.location.address}>
                         {issue.location.address}
                       </span>
                     </div>
                   </td>
 
                   {/* Severity (Guaranteed min-width and whitespace-nowrap, never truncates!) */}
-                  <td className="py-3 px-4 min-w-[110px] whitespace-nowrap">
+                  <td className="py-3 px-4 w-[110px] min-w-[110px] text-center whitespace-nowrap">
                     <span
-                      className={`inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded border uppercase tracking-wider whitespace-nowrap ${getSeverityBadge(
+                      className={`inline-flex items-center justify-center text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getSeverityBadge(
                         issue.severity
                       )}`}
                     >
@@ -317,9 +340,9 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                   </td>
 
                   {/* Status (Guaranteed min-width and whitespace-nowrap, never truncates!) */}
-                  <td className="py-3 px-4 min-w-[110px] whitespace-nowrap">
+                  <td className="py-3 px-4 w-[120px] min-w-[120px] text-center whitespace-nowrap">
                     <span
-                      className={`inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded border uppercase tracking-wider whitespace-nowrap ${getStatusBadge(
+                      className={`inline-flex items-center justify-center text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getStatusBadge(
                         issue.status
                       )}`}
                     >
@@ -328,24 +351,26 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                   </td>
 
                   {/* SLA / Deadline Countdown */}
-                  <td className="py-3 px-4 min-w-[140px] whitespace-nowrap">
+                  <td className="py-3 px-4 w-[140px] min-w-[140px] whitespace-nowrap">
                     <DeadlineTimer issue={issue} variant="compact" />
                   </td>
 
                   {/* Assigned Officer */}
-                  <td className="py-3 px-4 min-w-[140px] whitespace-nowrap">
+                  <td className="py-3 px-4 w-[150px] min-w-[140px] whitespace-nowrap">
                     {issue.assignedWorkerName ? (
-                      <div className="flex items-center space-x-1.5 text-[#1A73E8] font-medium">
+                      <div className="flex items-center space-x-1.5 text-[#1A73E8] font-medium text-xs">
                         <HardHat className="w-3.5 h-3.5 text-[#4285F4] flex-shrink-0" />
                         <span className="truncate">{issue.assignedWorkerName}</span>
                       </div>
                     ) : (
-                      <span className="text-[#5F6368] italic text-[11px]">Unassigned</span>
+                      <span className="text-gray-400 italic text-[11px] bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                        Unassigned
+                      </span>
                     )}
                   </td>
 
                   {/* Action Buttons */}
-                  <td className="py-3 px-4 text-right min-w-[90px] whitespace-nowrap">
+                  <td className="py-3 px-4 text-right w-[110px] min-w-[100px] whitespace-nowrap pr-4">
                     <div
                       className="flex items-center justify-end space-x-1.5"
                       onClick={(e) => e.stopPropagation()}

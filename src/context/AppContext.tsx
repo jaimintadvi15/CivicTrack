@@ -160,15 +160,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          parsed.userId &&
+          ['citizen', 'municipal', 'worker'].includes(parsed.role)
+        ) {
+          return parsed;
+        }
+        localStorage.removeItem(AUTH_STORAGE_KEY);
       }
     } catch {
-      // ignore
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
     }
     return null;
   });
 
-  const [role, setRole] = useState<UserRole>(session ? session.role : 'citizen');
+  const [role, setRole] = useState<UserRole>(session?.role || 'citizen');
   const [language, setLanguage] = useState<SupportedLanguage>('en');
   const [issues, setIssues] = useState<CivicIssue[]>(initialIssues);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {

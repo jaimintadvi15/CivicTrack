@@ -46,7 +46,7 @@ const MainApp: React.FC = () => {
         setActiveSection('home');
       }
     } else if (role === 'municipal') {
-      const allowedMunicipalSections: NavSection[] = ['queue', 'heatmap', 'dispatch', 'analytics', 'home'];
+      const allowedMunicipalSections: NavSection[] = ['queue', 'heatmap', 'analytics', 'home'];
       if (!allowedMunicipalSections.includes(activeSection)) {
         setActiveSection('queue');
       }

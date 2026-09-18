@@ -33,7 +33,7 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
       setViewMode('table');
     } else if (activeSection === 'heatmap') {
       setViewMode('map');
-    } else if (activeSection === 'dispatch' || activeSection === 'analytics') {
+    } else if (activeSection === 'analytics') {
       setViewMode('split');
     }
   }, [activeSection]);
@@ -145,7 +145,7 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#202124] flex items-center space-x-1.5">
                   <TableIcon className="w-4 h-4 text-[#4285F4]" />
-                  <span>Complaints Queue & Dispatch</span>
+                  <span>Complaints Queue</span>
                 </h3>
               </div>
               <ComplaintTable

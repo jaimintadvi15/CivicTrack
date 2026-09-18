@@ -91,8 +91,9 @@ export const evaluateAndEscalateOverdueIssues = (
       return updatedIssue;
     }
 
-    // Update dynamically calculated status (DUE_SOON / URGENT / ON_TRACK) if not escalated/resolved
-    if (issue.slaStatus !== 'ESCALATED' && issue.status !== 'Resolved') {
+    // Update dynamically calculated status (DUE_SOON / URGENT / ON_TRACK) if not escalated
+    // (issue.status is already guaranteed not to be 'Resolved' by the early return at the top)
+    if (issue.slaStatus !== 'ESCALATED') {
       if (issue.slaStatus !== currentSlaStatus) {
         return {
           ...issue,
