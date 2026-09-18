@@ -13,15 +13,29 @@ import {
   ChevronRight,
   Globe,
   LogOut,
-  Users,
   BarChart3,
   LayoutDashboard,
-  HardHat,
+  CheckCircle2,
+  Clock,
+  Map as MapIcon,
 } from 'lucide-react';
 import { CivicHeroLogo } from './CivicHeroLogo';
 import { UserRole } from '../../types';
 
-export type NavSection = 'home' | 'my-reports' | 'community' | 'transparency' | 'leaderboard';
+export type NavSection =
+
+  | 'home'
+  | 'my-reports'
+  | 'community'
+  | 'transparency'
+  | 'leaderboard'
+  | 'queue'
+  | 'heatmap'
+  | 'dispatch'
+  | 'analytics'
+  | 'assigned'
+  | 'in-progress'
+  | 'completed';
 
 interface NavigationRailProps {
   activeSection: NavSection;
@@ -44,67 +58,115 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   isMobileOpen = false,
   onCloseMobile,
 }) => {
-  const { role, setRole, issues, currentUser, logout, t } = useApp();
+  const { role, issues, currentUser, logout, t, fieldWorkers } = useApp();
 
   const myReportsCount = issues.filter((i) => isListingOwner(i, currentUser, auth?.currentUser?.uid)).length;
   const communityCount = issues.length;
+  const pendingQueueCount = issues.filter((i) => i.status !== 'Resolved').length;
 
-  const citizenNavItems: {
+  const currentWorkerId = fieldWorkers[0]?.id || 'worker-1';
+  const assignedWorkerTasks = issues.filter(
+    (i) => i.assignedWorkerId === currentWorkerId || !i.assignedWorkerId
+  );
+  const assignedCount = assignedWorkerTasks.length;
+  const inProgressCount = assignedWorkerTasks.filter((i) => i.status === 'In Progress').length;
+  const completedCount = assignedWorkerTasks.filter((i) => i.status === 'Resolved').length;
+
+  interface NavItem {
     id: NavSection;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     count?: number | string;
-  }[] = [
-      {
-        id: 'home',
-        label: 'Home',
-        icon: Home,
-      },
-      {
-        id: 'my-reports',
-        label: t.myReports || 'My Reports',
-        icon: FileText,
-        count: myReportsCount,
-      },
-      {
-        id: 'community',
-        label: t.communityFeed || 'Community Feed',
-        icon: Compass,
-        count: communityCount,
-      },
-      {
-        id: 'transparency',
-        label: 'Transparency Dashboard',
-        icon: BarChart3,
-      },
-      {
-        id: 'leaderboard',
-        label: 'Leaderboard & XP',
-        icon: Trophy,
-        count: `${currentUser.points} XP`,
-      },
-    ];
-  const staffNavItems: {
-    role: UserRole;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }[] = [
-      {
-        role: 'citizen',
-        label: 'Citizen Portal',
-        icon: Users,
-      },
-      {
-        role: 'municipal',
-        label: 'Municipal HQ',
-        icon: LayoutDashboard,
-      },
-      {
-        role: 'worker',
-        label: 'Field Ops',
-        icon: HardHat,
-      },
-    ];
+  }
+
+  const citizenNavItems: NavItem[] = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: Home,
+    },
+    {
+      id: 'my-reports',
+      label: t.myReports || 'My Reports',
+      icon: FileText,
+      count: myReportsCount,
+    },
+    {
+      id: 'community',
+      label: 'Nearby Issues',
+      icon: Compass,
+      count: communityCount,
+    },
+    {
+      id: 'transparency',
+      label: 'Transparency Dashboard',
+      icon: BarChart3,
+    },
+    {
+      id: 'leaderboard',
+      label: 'Leaderboard & XP',
+      icon: Trophy,
+      count: `${currentUser.points} XP`,
+    },
+  ];
+
+  const municipalNavItems: NavItem[] = [
+    {
+      id: 'queue',
+      label: 'Complaints Queue',
+      icon: FileText,
+      count: pendingQueueCount,
+    },
+    {
+      id: 'heatmap',
+      label: 'Density Heatmap',
+      icon: MapIcon,
+    },
+    {
+      id: 'dispatch',
+      label: 'Worker Dispatch',
+      icon: LayoutDashboard,
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+    },
+  ];
+
+  const workerNavItems: NavItem[] = [
+    {
+      id: 'assigned',
+      label: 'Assigned Tasks',
+      icon: FileText,
+      count: assignedCount,
+    },
+    {
+      id: 'in-progress',
+      label: 'In Progress',
+      icon: Clock,
+      count: inProgressCount,
+    },
+    {
+      id: 'completed',
+      label: 'Task Verification',
+      icon: CheckCircle2,
+      count: completedCount,
+    },
+  ];
+
+  const activeNavItems =
+    role === 'municipal'
+      ? municipalNavItems
+      : role === 'worker'
+      ? workerNavItems
+      : citizenNavItems;
+
+  const getSectionTitle = () => {
+    if (role === 'municipal') return 'Municipal HQ';
+    if (role === 'worker') return 'Field Ops';
+    return 'Citizen Portal';
+  };
 
   return (
     <>
@@ -119,11 +181,13 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
 
       {/* Navigation Rail Container */}
       <aside
-        className={`fixed top-14 sm:top-16 bottom-0 left-0 z-30 bg-white border-r border-[#DADCE0] transition-all duration-300 ease-in-out flex flex-col justify-between select-none ${isCollapsed ? 'md:w-18' : 'md:w-64'
-          } w-64 ${isMobileOpen
+        className={`fixed top-14 sm:top-16 bottom-0 left-0 z-30 bg-white border-r border-[#DADCE0] transition-all duration-300 ease-in-out flex flex-col justify-between select-none ${
+          isCollapsed ? 'md:w-18' : 'md:w-64'
+        } w-64 ${
+          isMobileOpen
             ? 'translate-x-0 shadow-elevation-8'
             : '-translate-x-full md:translate-x-0'
-          }`}
+        }`}
         aria-label="Navigation rail"
       >
         <div className="flex-1 overflow-y-auto overflow-x-hidden pt-3 px-2 sm:px-3 space-y-4">
@@ -132,7 +196,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             <CivicHeroLogo variant="horizontal" size="sm" showTagline={true} taglineText="CHANGE YOUR CITY." />
           </div>
 
-          {/* 1. Gmail-Style "+ Compose" / Google Drive "+ New" Pill Action Button */}
+          {/* 1. Gmail-Style "+ Compose" / Google Drive "+ New" Pill Action Button (Citizen Only) */}
           <div className="mb-2">
             {role === 'citizen' && (
               <button
@@ -140,8 +204,9 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   createRipple(e, 'rgba(66, 133, 244, 0.25)');
                   onOpenReport();
                 }}
-                className={`flex items-center justify-center rounded-full bg-white hover:bg-[#F8F9FA] text-[#202124] border border-[#DADCE0] shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-200 ripple-surface group ${isCollapsed ? 'w-12 h-12 mx-auto' : 'w-full px-4 py-3 space-x-3'
-                  }`}
+                className={`flex items-center justify-center rounded-full bg-white hover:bg-[#F8F9FA] text-[#202124] border border-[#DADCE0] shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-200 ripple-surface group ${
+                  isCollapsed ? 'w-12 h-12 mx-auto' : 'w-full px-4 py-3 space-x-3'
+                }`}
                 title="Report an Issue (+25 XP)"
                 aria-label="Report an Issue"
               >
@@ -162,97 +227,62 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             )}
           </div>
 
-          {/* 2. Primary Navigation Section (Citizen / General) */}
-          {role === 'citizen' && (
-            <nav className="space-y-1" aria-label="Citizen navigation">
-              {!isCollapsed && (
-                <span className="px-3 text-[11px] font-medium uppercase tracking-wider text-[#5F6368] block mb-1">
-                  Navigation
-                </span>
-              )}
-              {citizenNavItems.map((item) => {
-                const isActive = activeSection === item.id;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={(e) => {
-                      createRipple(e, 'rgba(66, 133, 244, 0.15)');
-                      onSelectSection(item.id);
-                    }}
-                    className={`w-full flex items-center rounded-full transition-colors text-sm font-medium ripple-surface relative group ${isCollapsed
-                      ? 'justify-center w-12 h-12 mx-auto'
-                      : 'justify-between px-4 py-2.5'
-                      } ${isActive
-                        ? 'bg-[#E8F0FE] text-[#1A73E8] font-semibold'
-                        : 'text-[#202124] hover:bg-[#F1F3F4]'
-                      }`}
-                    title={item.label}
-                    aria-label={item.label}
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <Icon
-                        className={`w-5 h-5 shrink-0 ${isActive ? 'text-[#1A73E8]' : 'text-[#5F6368] group-hover:text-[#202124]'
-                          }`}
-                      />
-                      {!isCollapsed && (
-                        <span className="truncate">{item.label}</span>
-                      )}
-                    </div>
-                    {!isCollapsed && item.count !== undefined && (
-                      <span
-                        className={`text-xs px-2 py-0.2 rounded-full font-medium ${isActive
-                          ? 'bg-[#1A73E8] text-white'
-                          : 'bg-gray-100 text-[#5F6368]'
-                          }`}
-                      >
-                        {item.count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          )}
-          {/* 3. Staff / Portals Section */}
-          <div className="pt-2 border-t border-[#DADCE0]">
+          {/* 2. Dynamic Role-Based Navigation Section */}
+          <nav className="space-y-1" aria-label={`${getSectionTitle()} navigation`}>
             {!isCollapsed && (
               <span className="px-3 text-[11px] font-medium uppercase tracking-wider text-[#5F6368] block mb-1">
-                Portals
+                {getSectionTitle()}
               </span>
             )}
-            <nav className="space-y-1" aria-label="Portal roles">
-              {staffNavItems.map((item) => {
-                const isActive = role === item.role;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.role}
-                    onClick={(e) => {
-                      createRipple(e, 'rgba(66, 133, 244, 0.15)');
-                      setRole(item.role);
-                    }}
-                    className={`w-full flex items-center rounded-full transition-colors text-sm font-medium ripple-surface relative group ${isCollapsed
-                        ? 'justify-center w-12 h-12 mx-auto'
-                        : 'justify-start space-x-3 px-4 py-2.5'
-                      } ${isActive
-                        ? 'bg-[#E8F0FE] text-[#1A73E8] font-semibold'
-                        : 'text-[#202124] hover:bg-[#F1F3F4]'
-                      }`}
-                    title={item.label}
-                    aria-label={item.label}
-                  >
+            {activeNavItems.map((item) => {
+              const isActive = activeSection === item.id;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={(e) => {
+                    createRipple(e, 'rgba(66, 133, 244, 0.15)');
+                    onSelectSection(item.id);
+                  }}
+                  className={`w-full flex items-center rounded-full transition-colors text-sm font-medium ripple-surface relative group ${
+                    isCollapsed
+                      ? 'justify-center w-12 h-12 mx-auto'
+                      : 'justify-between px-4 py-2.5'
+                  } ${
+                    isActive
+                      ? 'bg-[#E8F0FE] text-[#1A73E8] font-semibold'
+                      : 'text-[#202124] hover:bg-[#F1F3F4]'
+                  }`}
+                  title={item.label}
+                  aria-label={item.label}
+                >
+                  <div className="flex items-center space-x-3 min-w-0">
                     <Icon
-                      className={`w-5 h-5 shrink-0 ${isActive ? 'text-[#1A73E8]' : 'text-[#5F6368] group-hover:text-[#202124]'
-                        }`}
+                      className={`w-5 h-5 shrink-0 ${
+                        isActive ? 'text-[#1A73E8]' : 'text-[#5F6368] group-hover:text-[#202124]'
+                      }`}
                     />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+                    {!isCollapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </div>
+                  {!isCollapsed && item.count !== undefined && (
+                    <span
+                      className={`text-xs px-2 py-0.2 rounded-full font-medium ${
+                        isActive
+                          ? 'bg-[#1A73E8] text-white'
+                          : 'bg-gray-100 text-[#5F6368]'
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
+
 
         {/* 4. Rail Bottom Footer: Language, Collapse Toggle, Logout */}
         <div className="p-2 border-t border-[#DADCE0] bg-[#F8F9FA] space-y-1">

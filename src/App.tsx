@@ -37,12 +37,26 @@ const MainApp: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedIssueForPane, setSelectedIssueForPane] = useState<CivicIssue | null>(null);
 
-  // Ensure all users land on the Home page immediately after login / onboarding
+  // Route protection & RBAC guards: redirect unauthorized sections based on active role
   React.useEffect(() => {
-    if (session) {
-      setActiveSection('home');
+    if (!session) return;
+    if (role === 'citizen') {
+      const allowedCitizenSections: NavSection[] = ['home', 'my-reports', 'community', 'transparency', 'leaderboard'];
+      if (!allowedCitizenSections.includes(activeSection)) {
+        setActiveSection('home');
+      }
+    } else if (role === 'municipal') {
+      const allowedMunicipalSections: NavSection[] = ['queue', 'heatmap', 'dispatch', 'analytics', 'home'];
+      if (!allowedMunicipalSections.includes(activeSection)) {
+        setActiveSection('queue');
+      }
+    } else if (role === 'worker') {
+      const allowedWorkerSections: NavSection[] = ['assigned', 'in-progress', 'completed', 'home'];
+      if (!allowedWorkerSections.includes(activeSection)) {
+        setActiveSection('assigned');
+      }
     }
-  }, [session?.userId]);
+  }, [role, session?.userId, activeSection]);
 
   // Modals and Overlays
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
@@ -148,9 +162,9 @@ const MainApp: React.FC = () => {
             />
           )}
 
-          {role === 'municipal' && <MunicipalDashboard />}
+          {role === 'municipal' && <MunicipalDashboard activeSection={activeSection} />}
 
-          {role === 'worker' && <FieldWorkerApp />}
+          {role === 'worker' && <FieldWorkerApp activeSection={activeSection} />}
         </main>
 
         {/* Footer with Urban Fix Logo */}
