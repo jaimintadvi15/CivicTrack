@@ -324,25 +324,22 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
         </>
       )}
 
-      {/* SECTION 2: Filter Toolbar (Google Workspace-style Pills) */}
-      <div className="space-y-4">
+      {/* SECTION 2: Filter Toolbar & Issues Feed (Only shown on dedicated tabs like 'community' or 'my-reports') */}
+      {activeSection !== 'home' && (
+        <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#DADCE0]">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-[#202124]">
-              {activeSection === 'home'
-                ? 'Recent Community Issues'
-                : activeSection === 'my-reports'
-                  ? 'My Reported Issues'
-                  : activeSection === 'leaderboard'
-                    ? 'Civic Leaderboard & Rankings'
-                    : 'Community Issues Feed'}
+              {activeSection === 'my-reports'
+                ? 'My Reported Issues'
+                : activeSection === 'leaderboard'
+                  ? 'Civic Leaderboard & Rankings'
+                  : 'Community Issues Feed'}
             </h2>
             <p className="text-xs text-[#5F6368] mt-0.5">
               {activeSection === 'my-reports'
                 ? `${filteredIssues.length} issues reported by you`
-                : activeSection === 'community'
-                  ? `${filteredIssues.length} community reports across Bengaluru`
-                  : `${filteredIssues.length} reports in ${currentUser.ward.split('-')[0]}`}
+                : `${filteredIssues.length} community reports across Bengaluru`}
             </p>
           </div>
 
@@ -616,6 +613,7 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
           </div>
         )}
       </div>
+    )}
     </div>
   );
 };

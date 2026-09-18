@@ -73,8 +73,8 @@ const LOCAL_STORAGE_KEY = 'civic_hero_persistent_listings_v1';
 const RATE_LIMIT_KEY = 'civic_hero_rate_limits_v1';
 const MAX_LISTINGS_PER_DAY = 5;
 
-const PURGED_TICKETS = new Set(['BLR-2026-9065']);
-const PURGED_TITLES = new Set(['hdjkhgdfgngkd']);
+const PURGED_TICKETS = new Set(['BLR-2026-9065', 'BLR-2026-7202']);
+const PURGED_TITLES = new Set(['hdjkhgdfgngkd', 'kjdkj']);
 
 export const isPurgedListing = (l: { ticketNumber?: string; title?: string }): boolean => {
   if (l.ticketNumber && PURGED_TICKETS.has(l.ticketNumber)) return true;
