@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Sparkles, X, CheckCircle2, ShieldCheck, Share2 } from 'lucide-react';
 import { createRipple } from '../common/MaterialRipple';
+import { playClappingSound } from '../../utils/audio';
 
 export const BadgeUnlockCelebration: React.FC = () => {
   const { celebratingBadge, setCelebratingBadge, triggerCelebration, currentUser } = useApp();
@@ -123,6 +124,7 @@ export const BadgeUnlockCelebration: React.FC = () => {
             <button
               onClick={(e) => {
                 createRipple(e, 'rgba(0, 0, 0, 0.1)');
+                playClappingSound();
                 triggerCelebration();
               }}
               className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-lg border border-[#DADCE0] hover:bg-[#F8F9FA] text-xs font-medium text-[#3C4043] transition-colors ripple-surface flex items-center justify-center space-x-1.5"

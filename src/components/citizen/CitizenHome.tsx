@@ -5,6 +5,7 @@ import { getAssetUrl } from '../../utils/assetUrl';
 import { isListingOwner } from '../../utils/ownership';
 import { auth } from '../../lib/firebase';
 import { createRipple } from '../common/MaterialRipple';
+import { playClappingSound } from '../../utils/audio';
 import { GoogleSearchHero } from './GoogleSearchHero';
 import { DeadlineTimer } from '../common/DeadlineTimer';
 import {
@@ -243,6 +244,7 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                     key={badge.id}
                     onClick={() => {
                       if (badge.unlocked) {
+                        playClappingSound();
                         celebrateBadge(badge);
                       }
                     }}

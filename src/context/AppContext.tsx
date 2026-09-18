@@ -26,6 +26,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { normalizePhone } from '../utils/ownership';
+import { playClappingSound } from '../utils/audio';
 import {
   subscribeToListings,
   createListingDocument,
@@ -362,6 +363,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const triggerCelebration = () => {
     try {
+      // Play energetic celebratory clapping and cheer sound
+      playClappingSound();
+
       // Primary celebratory burst using signature Google brand palette
       confetti({
         particleCount: 75,
