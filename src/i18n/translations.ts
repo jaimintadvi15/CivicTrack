@@ -124,11 +124,11 @@ export interface TranslationStrings {
 
 export const translations: Record<SupportedLanguage, TranslationStrings> = {
   en: {
-    appName: 'Civic Hero',
+    appName: 'Urban Fix',
     tagline: 'Change Your City.',
     taglineSub: 'Empowering citizens with AI to fix public issues faster.',
-    loginTitle: 'Sign In to Civic Hero',
-    loginSubtitle: 'Enter your mobile number to get started or manage civic issues.',
+    loginTitle: 'Sign In to Urban Fix',
+    loginSubtitle: 'Enter your mobile number to report issues and track resolutions.',
     enterPhone: 'Mobile Phone Number',
     phonePlaceholder: 'Enter 10-digit mobile number',
     sendOtp: 'Get Verification OTP',

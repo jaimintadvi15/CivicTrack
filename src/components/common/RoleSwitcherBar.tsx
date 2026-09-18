@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { UserRole } from '../../types';
 import { createRipple } from './MaterialRipple';
 import {
   Menu,
-  LayoutDashboard,
-  HardHat,
-  Users,
   Globe,
   LogOut,
   Bell,
   Trophy,
   Search,
   X,
-  ChevronDown,
 } from 'lucide-react';
 import { languageList } from '../../i18n/translations';
 import { CivicHeroLogo } from './CivicHeroLogo';
@@ -37,7 +32,6 @@ export const RoleSwitcherBar: React.FC<RoleSwitcherBarProps> = ({
 }) => {
   const {
     role,
-    setRole,
     language,
     session,
     logout,
@@ -46,29 +40,9 @@ export const RoleSwitcherBar: React.FC<RoleSwitcherBarProps> = ({
     t,
   } = useApp();
 
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const roles: { key: UserRole; label: string; icon: React.ReactNode }[] = [
-    {
-      key: 'citizen',
-      label: t.citizenRole || 'Citizen Portal',
-      icon: <Users className="w-4 h-4" />,
-    },
-    {
-      key: 'municipal',
-      label: t.municipalRole || 'Municipal HQ',
-      icon: <LayoutDashboard className="w-4 h-4" />,
-    },
-    {
-      key: 'worker',
-      label: t.workerRole || 'Field Ops',
-      icon: <HardHat className="w-4 h-4" />,
-    },
-  ];
-
   const currentLangObj = languageList.find((l) => l.code === language);
-  const activeRoleObj = roles.find((r) => r.key === role) || roles[0];
 
   return (
     <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 z-40 bg-white text-[#202124] border-b border-[#DADCE0] shadow-xs">
@@ -132,45 +106,7 @@ export const RoleSwitcherBar: React.FC<RoleSwitcherBarProps> = ({
 
         {/* Right: Role Switcher Dropdown, XP Chip, Notifications, Profile */}
         <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
-          {/* Role Switcher Dropdown Pill */}
-          <div className="relative">
-            <button
-              onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-full border border-[#DADCE0] hover:bg-[#F1F3F4] text-xs font-medium text-[#202124] transition-colors"
-              title="Switch portal view"
-              aria-label="Switch portal view"
-            >
-              <span className="text-[#4285F4]">{activeRoleObj.icon}</span>
-              <span className="hidden md:inline font-semibold">{activeRoleObj.label}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#5F6368]" />
-            </button>
-
-            {isRoleDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-52 bg-white rounded-xl shadow-elevation-4 border border-[#DADCE0] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <span className="px-3 py-1 text-[10px] font-semibold text-[#5F6368] uppercase tracking-wider block">
-                  Switch Active Portal
-                </span>
-                {roles.map((r) => (
-                  <button
-                    key={r.key}
-                    onClick={(e) => {
-                      createRipple(e);
-                      setRole(r.key);
-                      setIsRoleDropdownOpen(false);
-                    }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left ${
-                      role === r.key
-                        ? 'bg-[#E8F0FE] text-[#1A73E8] font-bold'
-                        : 'text-[#202124] hover:bg-[#F1F3F4]'
-                    }`}
-                  >
-                    <span>{r.icon}</span>
-                    <span>{r.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Removed Role Switcher Dropdown Pill */}
 
           {/* Gamification XP Pill */}
           {role === 'citizen' && onOpenGamification && (

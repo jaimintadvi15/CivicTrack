@@ -31,7 +31,7 @@ export const GoogleSearchHero: React.FC<GoogleSearchHeroProps> = ({
     <section className="w-full py-8 sm:py-12 flex flex-col items-center justify-center">
       {/* 1. Centered Minimal Hero: Logo + Tagline with Generous Whitespace */}
       <div className="text-center max-w-2xl mx-auto px-4 mb-6 sm:mb-8 space-y-4">
-        {/* Official Google-Themed Civic Hero Logo (Icon + Wordmark + Tagline) */}
+        {/* Official Google-Themed Urban Fix Logo (Icon + Wordmark + Tagline) */}
         <CivicHeroLogo
           variant="full"
           size="xl"
@@ -125,7 +125,7 @@ export const GoogleSearchHero: React.FC<GoogleSearchHeroProps> = ({
       <div className="w-full max-w-5xl px-4 mt-8 sm:mt-12">
         <div className="text-center mb-6">
           <span className="text-xs font-medium uppercase tracking-wider text-[#5F6368]">
-            How Civic Hero Works
+            How Urban Fix Works
           </span>
           <h2 className="text-lg sm:text-xl font-bold text-[#202124] mt-1">
             Empowering Citizens • Resolving Civic Issues

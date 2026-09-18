@@ -100,13 +100,18 @@ interface AppContextType {
   setSelectedIssueForTracking: (issue: CivicIssue | null) => void;
   isReportModalOpen: boolean;
   setIsReportModalOpen: (open: boolean) => void;
-  
+
   // Auth Actions
   loginWithPhone: (
     phone: string,
     otp: string,
     inviteCode?: string
   ) => { success: boolean; isNewUser: boolean; role: UserRole; error?: string };
+  loginWithIdAndPassword: (
+    role: UserRole,
+    id: string,
+    otp: string
+  ) => { success: boolean; role: UserRole; error?: string };
   completeCitizenOnboarding: (name: string, ward: string) => void;
   quickDemoLogin: (role: UserRole) => void;
   logout: () => void;
@@ -387,8 +392,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       (auth?.currentUser?.uid
         ? auth.currentUser.uid
         : matched
-        ? `user-${normalizePhone(matched.phone)}`
-        : `user-${normalizedInput}`);
+          ? `user-${normalizePhone(matched.phone)}`
+          : `user-${normalizedInput}`);
 
     const newSession: AuthSession = {
       userId: stableUserId,
@@ -436,6 +441,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   };
 
+  // Staff Login with ID, Password (verified in component), and OTP
+  const loginWithIdAndPassword = (
+    role: UserRole,
+    id: string,
+    otp: string
+  ): { success: boolean; role: UserRole; error?: string } => {
+    const cleanedOtp = otp.trim();
+    if (cleanedOtp.length < 4) {
+      return { success: false, role: 'citizen', error: 'Please enter a valid OTP' };
+    }
+
+    let userName = 'Staff User';
+    let userDept = '';
+    let userWard = '';
+    let workerId = '';
+    
+    if (role === 'municipal') {
+      userName = 'Municipal Officer';
+      userDept = 'BBMP Municipal Administration';
+      userWard = 'Citywide Admin HQ';
+    } else if (role === 'worker') {
+      userName = 'Field Operative';
+      userDept = 'Public Works Dept';
+      userWard = 'Ward 4 - Indiranagar';
+      workerId = 'worker-1';
+    }
+
+    const stableUserId = `staff-${id}`;
+    
+    const newSession: AuthSession = {
+      userId: stableUserId,
+      name: userName,
+      phone: '',
+      role: role,
+      department: userDept,
+      ward: userWard,
+      workerId: workerId,
+      avatar: '',
+      isFirstLogin: false,
+    };
+
+    setSession(newSession);
+    setRole(role);
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+
+    addToast({
+      title: `Signed In as ${role === 'municipal' ? 'Municipal Staff' : 'Field Worker'}`,
+      message: `Welcome, ${userName}!`,
+      type: 'info',
+    });
+
+    return {
+      success: true,
+      role: role,
+    };
+  };
+
   // Onboarding completion for new citizen
   const completeCitizenOnboarding = (name: string, ward: string) => {
     if (!session) return;
@@ -469,7 +531,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addPoints(50, 'Welcome Bonus');
     addToast({
       title: 'Profile Created! +50 XP 🌟',
-      message: `Welcome to Civic Hero, ${finalName}!`,
+      message: `Welcome to Urban Fix, ${finalName}!`,
       type: 'success',
     });
     triggerCelebration();
@@ -579,7 +641,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       customCategory: data.customCategory,
       severity: data.severity,
       status: 'Submitted',
-      description: data.description || 'Reported via Civic Hero citizen community listing.',
+      description: data.description || 'Reported via Urban Fix citizen community listing.',
       location: data.location,
       photoUrl: data.photoUrl,
       photos: photosList,
@@ -616,7 +678,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       category: effectiveCategory,
       customCategory: data.customCategory,
       severity: data.severity,
-      description: data.description || 'Reported via Civic Hero citizen community listing.',
+      description: data.description || 'Reported via Urban Fix citizen community listing.',
       photoFiles: filesToUpload,
       address: data.location.address,
       ward: data.location.ward,
@@ -814,9 +876,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 status: 'In Progress',
                 timestamp: 'Just now',
                 title: 'Assigned to Field Officer',
-                description: `Dispatched to ${worker.name} (${worker.department}). Target SLA: ${targetHours} hrs.${
-                  instructions ? ` Special note: ${instructions}` : ''
-                }`,
+                description: `Dispatched to ${worker.name} (${worker.department}). Target SLA: ${targetHours} hrs.${instructions ? ` Special note: ${instructions}` : ''
+                  }`,
                 actor: 'Municipal Dispatch',
               },
             ],
@@ -964,6 +1025,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isReportModalOpen,
         setIsReportModalOpen,
         loginWithPhone,
+        loginWithIdAndPassword,
         completeCitizenOnboarding,
         quickDemoLogin,
         logout,

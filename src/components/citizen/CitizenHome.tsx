@@ -24,6 +24,7 @@ import {
   User,
 } from 'lucide-react';
 import { NavSection } from '../common/NavigationRail';
+import { TransparencyDashboard } from '../transparency/TransparencyDashboard';
 
 interface CitizenHomeProps {
   activeSection: NavSection;
@@ -49,6 +50,15 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
   const { currentUser, role, issues, upvoteReport, flagReport, deleteReport, t, celebrateBadge } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'upvotes'>('recent');
+
+  if (activeSection === 'transparency') {
+    return (
+      <TransparencyDashboard
+        onSelectIssue={onSelectIssue}
+        onOpenReport={onOpenReport}
+      />
+    );
+  }
 
   // Gamification level progress calculation
   const currentLevelProgress = Math.min(
@@ -236,20 +246,18 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                         celebrateBadge(badge);
                       }
                     }}
-                    className={`min-w-[210px] sm:min-w-[230px] max-w-[240px] p-4 rounded-xl flex flex-col justify-between select-none ${
-                      badge.unlocked
+                    className={`min-w-[210px] sm:min-w-[230px] max-w-[240px] p-4 rounded-xl flex flex-col justify-between select-none ${badge.unlocked
                         ? 'trophy-shelf-card cursor-pointer group'
                         : 'trophy-shelf-card-locked cursor-default'
-                    }`}
+                      }`}
                   >
                     {/* Top: Icon & Status */}
                     <div className="flex items-start justify-between">
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-xs ${
-                          badge.unlocked
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-xs ${badge.unlocked
                             ? 'bg-gradient-to-br from-[#FEF7E0] to-[#FFF3CD] border border-[#FBBC05]/50 badge-shimmer-container'
                             : 'bg-[#E8EAED] border border-[#DADCE0] text-[#70757A]'
-                        }`}
+                          }`}
                       >
                         <span>{badge.icon}</span>
                       </div>
@@ -268,11 +276,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                     {/* Content */}
                     <div className="my-2.5">
                       <h4
-                        className={`text-sm font-bold truncate ${
-                          badge.unlocked
+                        className={`text-sm font-bold truncate ${badge.unlocked
                             ? 'text-[#202124] group-hover:text-[#B06000] transition-colors'
                             : 'text-[#5F6368]'
-                        }`}
+                          }`}
                       >
                         {badge.name}
                       </h4>
@@ -325,17 +332,17 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
               {activeSection === 'home'
                 ? 'Recent Community Issues'
                 : activeSection === 'my-reports'
-                ? 'My Reported Issues'
-                : activeSection === 'leaderboard'
-                ? 'Civic Leaderboard & Rankings'
-                : 'Community Issues Feed'}
+                  ? 'My Reported Issues'
+                  : activeSection === 'leaderboard'
+                    ? 'Civic Leaderboard & Rankings'
+                    : 'Community Issues Feed'}
             </h2>
             <p className="text-xs text-[#5F6368] mt-0.5">
               {activeSection === 'my-reports'
                 ? `${filteredIssues.length} issues reported by you`
                 : activeSection === 'community'
-                ? `${filteredIssues.length} community reports across Bengaluru`
-                : `${filteredIssues.length} reports in ${currentUser.ward.split('-')[0]}`}
+                  ? `${filteredIssues.length} community reports across Bengaluru`
+                  : `${filteredIssues.length} reports in ${currentUser.ward.split('-')[0]}`}
             </p>
           </div>
 
@@ -350,11 +357,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                     createRipple(e, 'rgba(66, 133, 244, 0.15)');
                     setSelectedCategory(cat.key);
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${
-                    selectedCategory === cat.key
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${selectedCategory === cat.key
                       ? 'bg-[#E8F0FE] text-[#1A73E8] border-[#4285F4]'
                       : 'bg-white text-[#5F6368] border-[#DADCE0] hover:bg-[#F8F9FA]'
-                  }`}
+                    }`}
                 >
                   {cat.label}
                 </button>
@@ -368,11 +374,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                   createRipple(e, 'rgba(66, 133, 244, 0.15)');
                   setSortBy('recent');
                 }}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
-                  sortBy === 'recent'
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${sortBy === 'recent'
                     ? 'bg-[#E8F0FE] text-[#1A73E8] border-[#4285F4]'
                     : 'bg-white text-[#5F6368] border-[#DADCE0] hover:bg-[#F8F9FA]'
-                }`}
+                  }`}
                 title="Sort by most recent"
               >
                 Newest
@@ -382,11 +387,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                   createRipple(e, 'rgba(251, 188, 5, 0.2)');
                   setSortBy('upvotes');
                 }}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
-                  sortBy === 'upvotes'
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${sortBy === 'upvotes'
                     ? 'bg-[#FEF7E0] text-[#B06000] border-[#FBBC05]/60'
                     : 'bg-white text-[#5F6368] border-[#DADCE0] hover:bg-[#F8F9FA]'
-                }`}
+                  }`}
                 title="Sort by most upvoted"
               >
                 Most Upvoted 🔥
@@ -438,11 +442,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                     createRipple(e, 'rgba(66, 133, 244, 0.1)');
                     onSelectIssue(issue);
                   }}
-                  className={`bg-white rounded-xl shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-200 border flex flex-col justify-between overflow-hidden cursor-pointer group ripple-surface ${
-                    isSelected
+                  className={`bg-white rounded-xl shadow-elevation-1 hover:shadow-elevation-3 transition-all duration-200 border flex flex-col justify-between overflow-hidden cursor-pointer group ripple-surface ${isSelected
                       ? 'border-[#4285F4] ring-2 ring-[#4285F4]/30 shadow-elevation-3'
                       : 'border-[#DADCE0]'
-                  }`}
+                    }`}
                 >
                   {/* Card Media Header */}
                   <div className="relative aspect-video w-full bg-gray-100 overflow-hidden">
@@ -548,11 +551,10 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                               createRipple(e, 'rgba(66, 133, 244, 0.2)');
                               upvoteReport(issue.id);
                             }}
-                            className={`flex items-center space-x-1.5 px-3 py-1 rounded text-xs font-medium transition-all ripple-surface ${
-                              issue.hasUpvoted
+                            className={`flex items-center space-x-1.5 px-3 py-1 rounded text-xs font-medium transition-all ripple-surface ${issue.hasUpvoted
                                 ? 'bg-[#E8F0FE] text-[#1A73E8] border border-[#4285F4]'
                                 : 'bg-white text-[#202124] border border-[#DADCE0] hover:bg-[#F8F9FA]'
-                            }`}
+                              }`}
                             title={issue.hasUpvoted ? "You confirmed facing this issue" : "I'm facing this too / Upvote (+5 XP)"}
                             aria-label="I'm facing this too / Upvote"
                           >
