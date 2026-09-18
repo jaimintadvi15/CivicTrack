@@ -10,6 +10,7 @@
     "deploy": "node scripts/deploy-gh-pages.cjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "firebase": "^12.18.0",

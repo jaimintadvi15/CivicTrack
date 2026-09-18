@@ -9,9 +9,11 @@ export const cleanPhone = (phone?: string | null): string => {
 };
 
 /**
- * Normalizes phone numbers to standard 10-digit format (omitting country code prefixes like +91 / 0)
+ * Normalizes contact identifiers. Handles standard 10-digit phone formats or email addresses.
  */
 export const normalizePhone = (phone?: string | null): string => {
+  if (!phone) return '';
+  if (phone.includes('@')) return phone.trim().toLowerCase();
   const digits = cleanPhone(phone);
   return digits.length >= 10 ? digits.slice(-10) : digits;
 };

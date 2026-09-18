@@ -13,13 +13,13 @@ import {
   ChevronRight,
   Globe,
   LogOut,
-<<<<<<< HEAD
   Users,
   BarChart3,
-=======
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
+  LayoutDashboard,
+  HardHat,
 } from 'lucide-react';
 import { CivicHeroLogo } from './CivicHeroLogo';
+import { UserRole } from '../../types';
 
 export type NavSection = 'home' | 'my-reports' | 'community' | 'transparency' | 'leaderboard';
 
@@ -73,22 +73,17 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         count: communityCount,
       },
       {
-<<<<<<< HEAD
         id: 'transparency',
         label: 'Transparency Dashboard',
         icon: BarChart3,
       },
       {
-=======
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
         id: 'leaderboard',
         label: 'Leaderboard & XP',
         icon: Trophy,
         count: `${currentUser.points} XP`,
       },
     ];
-<<<<<<< HEAD
-
   const staffNavItems: {
     role: UserRole;
     label: string;
@@ -110,10 +105,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         icon: HardHat,
       },
     ];
-=======
-
-
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
 
   return (
     <>
@@ -224,7 +215,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             </nav>
           )}
 
-<<<<<<< HEAD
           {/* 3. Staff / Portals Section */}
           <div className="pt-2 border-t border-[#DADCE0]">
             {!isCollapsed && (
@@ -263,9 +253,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               })}
             </nav>
           </div>
-=======
-        {/* Removed Staff / Portals Section */}
->>>>>>> 65c4f44ee8ea1626473e850355f0df9016cdc171
+
         </div>
 
         {/* 4. Rail Bottom Footer: Language, Collapse Toggle, Logout */}
