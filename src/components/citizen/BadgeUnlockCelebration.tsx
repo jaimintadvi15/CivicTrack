@@ -34,10 +34,11 @@ export const BadgeUnlockCelebration: React.FC = () => {
         {/* Top Google 4-Color Strip */}
         <div className="google-accent-bar" />
 
-        {/* Close button positioned at top right of modal */}
+        {/* Close button positioned at top right corner */}
         <button
           onClick={handleClose}
-          className="absolute top-3 right-3 z-30 p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-black/10 transition-colors ripple-surface cursor-pointer bg-white/80 backdrop-blur-xs border border-gray-200/60 shadow-xs"
+          style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 40 }}
+          className="p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-black/10 transition-colors ripple-surface cursor-pointer bg-white/80 backdrop-blur-xs border border-gray-200/60 shadow-xs"
           aria-label="Close celebration modal"
         >
           <X className="w-5 h-5" />
