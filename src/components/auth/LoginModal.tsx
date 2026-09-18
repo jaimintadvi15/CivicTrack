@@ -70,7 +70,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
         setStep('otp');
         return;
       } catch (err: any) {
-        console.warn('Supabase Email Auth notice (falling back to demo OTP):', err);
+        console.error('Supabase Email Auth error:', err);
+        setError(err.message || 'Failed to send verification code. Please check your configuration.');
+        setIsLoading(false);
+        return; // Don't fall back to demo mode for real emails
       }
     }
 
@@ -107,7 +110,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
     setIsLoading(true);
     setError('');
 
-    if (confirmationResult && otp !== '123456') {
+    const isDemoEmail = ['citizen@gmail.com', 'test@test.com'].includes(email.toLowerCase());
+
+    if (!isDemoEmail && loginRole === 'citizen') {
+      try {
+        const { error } = await supabase.auth.verifyOtp({
+          email,
+          token: otp,
+          type: 'email'
+        });
+        if (error) throw error;
+      } catch (err: any) {
+        setError(err.message || 'Invalid OTP code');
+        setIsLoading(false);
+        return;
+      }
+    } else if (confirmationResult && otp !== '123456') {
       try {
         await confirmationResult.confirm(otp);
       } catch (err: any) {
