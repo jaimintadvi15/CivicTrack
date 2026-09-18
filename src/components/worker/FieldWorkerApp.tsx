@@ -5,6 +5,7 @@ import { getAssetUrl } from '../../utils/assetUrl';
 import { ResolveTaskModal } from './ResolveTaskModal';
 import { IssueTrackerModal } from '../citizen/IssueTrackerModal';
 import { createRipple } from '../common/MaterialRipple';
+import { DeadlineTimer } from '../common/DeadlineTimer';
 import {
   MapPin,
   Play,
@@ -218,6 +219,9 @@ export const FieldWorkerApp: React.FC = () => {
                       <MapPin className="w-3.5 h-3.5 text-[#4285F4] mr-1 flex-shrink-0" />
                       <span className="truncate">{task.location.address}</span>
                     </p>
+                    <div className="mt-1.5">
+                      <DeadlineTimer issue={task} variant="compact" />
+                    </div>
                   </div>
                 </div>
 

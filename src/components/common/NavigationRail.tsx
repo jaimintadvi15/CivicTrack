@@ -214,7 +214,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               })}
             </nav>
           )}
-
           {/* 3. Staff / Portals Section */}
           <div className="pt-2 border-t border-[#DADCE0]">
             {!isCollapsed && (
@@ -253,7 +252,6 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               })}
             </nav>
           </div>
-
         </div>
 
         {/* 4. Rail Bottom Footer: Language, Collapse Toggle, Logout */}

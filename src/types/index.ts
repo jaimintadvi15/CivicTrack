@@ -11,6 +11,24 @@ export type IssueSeverity = 'Low' | 'Medium' | 'High' | 'Critical';
 
 export type IssueStatus = 'Submitted' | 'Acknowledged' | 'In Progress' | 'Resolved';
 
+export type SlaStatus =
+  | 'ON_TRACK'
+  | 'DUE_SOON'
+  | 'URGENT'
+  | 'OVERDUE'
+  | 'RESOLVED_WITHIN_SLA'
+  | 'RESOLVED_OVERDUE'
+  | 'ESCALATED';
+
+export interface EscalationEvent {
+  id: string;
+  escalatedAt: string;
+  fromAuthority: string;
+  toAuthority: string;
+  reason: string;
+  level: number;
+}
+
 export interface TimelineEvent {
   id: string;
   status: IssueStatus;
@@ -59,7 +77,21 @@ export interface CivicIssue {
   includeReporterContact?: boolean;
   resolutionRemarks?: string;
   resolvedAt?: string;
+  
+  // SLA & Escalation fields
+  slaDurationHours?: number;
+  slaStartedAt?: string;
+  slaDeadlineAt?: string;
+  slaStatus?: SlaStatus;
+  actualResolutionHours?: number;
+  wasResolvedWithinSLA?: boolean;
+  escalatedAt?: string;
+  escalatedFrom?: string;
+  escalatedTo?: string;
+  escalationReason?: string;
+  escalationHistory?: EscalationEvent[];
 }
+
 
 
 export interface FieldWorker {

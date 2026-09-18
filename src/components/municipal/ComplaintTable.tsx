@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { CivicIssue } from '../../types';
 import { getAssetUrl } from '../../utils/assetUrl';
 import { createRipple } from '../common/MaterialRipple';
+import { DeadlineTimer } from '../common/DeadlineTimer';
+import { computeSlaStatus } from '../../config/slaConfig';
 import {
   Search,
   Eye,
@@ -34,6 +36,7 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
   const { issues, deleteReport, t } = useApp();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [slaFilter, setSlaFilter] = useState<string>('all');
   const [wardFilter, setWardFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'upvotes'>('date');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -42,7 +45,7 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, wardFilter, categoryFilter, severityFilter, sortBy]);
+  }, [searchQuery, statusFilter, slaFilter, wardFilter, categoryFilter, severityFilter, sortBy]);
 
   // Distinct wards from issues
   const wards = Array.from(new Set(issues.map((i) => i.location.ward)));
@@ -60,7 +63,16 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
     const matchesStatus = statusFilter === 'all' || issue.status === statusFilter;
     const matchesWard = wardFilter === 'all' || issue.location.ward === wardFilter;
 
-    return matchesSearch && matchesCategory && matchesSeverity && matchesStatus && matchesWard;
+    let matchesSla = true;
+    if (slaFilter !== 'all') {
+      const st = computeSlaStatus(issue);
+      if (slaFilter === 'ESCALATED') matchesSla = st === 'ESCALATED' || st === 'OVERDUE';
+      else if (slaFilter === 'DUE_SOON') matchesSla = st === 'DUE_SOON' || st === 'URGENT';
+      else if (slaFilter === 'ON_TRACK') matchesSla = st === 'ON_TRACK';
+      else if (slaFilter === 'RESOLVED') matchesSla = st === 'RESOLVED_WITHIN_SLA';
+    }
+
+    return matchesSearch && matchesCategory && matchesSeverity && matchesStatus && matchesWard && matchesSla;
   });
 
   // Sort
@@ -153,6 +165,19 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
             <option value="Resolved">Resolved</option>
           </select>
 
+          {/* SLA Filter */}
+          <select
+            value={slaFilter}
+            onChange={(e) => setSlaFilter(e.target.value)}
+            className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
+          >
+            <option value="all">All SLA States</option>
+            <option value="ON_TRACK">On Track</option>
+            <option value="DUE_SOON">Due Soon (&lt; 24h)</option>
+            <option value="ESCALATED">Auto Escalated / Overdue</option>
+            <option value="RESOLVED">Resolved Within SLA</option>
+          </select>
+
           {/* Category */}
           <select
             value={categoryFilter}
@@ -211,6 +236,7 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
               <th className="py-3 px-4 min-w-[140px]">Ward Location</th>
               <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Severity</th>
               <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+              <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">SLA / Deadline</th>
               <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Assigned Worker</th>
               <th className="py-3 px-4 min-w-[90px] text-right whitespace-nowrap">Actions</th>
             </tr>
@@ -299,6 +325,11 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                     >
                       {t.statuses[issue.status] || issue.status}
                     </span>
+                  </td>
+
+                  {/* SLA / Deadline Countdown */}
+                  <td className="py-3 px-4 min-w-[140px] whitespace-nowrap">
+                    <DeadlineTimer issue={issue} variant="compact" />
                   </td>
 
                   {/* Assigned Officer */}
