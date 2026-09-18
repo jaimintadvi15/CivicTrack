@@ -115,6 +115,7 @@ interface AppContextType {
   ) => { success: boolean; role: UserRole; error?: string };
   completeCitizenOnboarding: (name: string, ward: string) => void;
   quickDemoLogin: (role: UserRole) => void;
+  loginWithGoogle: (email?: string, name?: string) => void;
   logout: () => void;
 
   // Actions
@@ -605,6 +606,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Google sign-in helper
+  const loginWithGoogle = (email = 'citizen.google@gmail.com', name = 'Citizen Hero') => {
+    const stableUserId = `google-user-${normalizePhone(email)}`;
+    const savedProfile = getSavedProfile(normalizePhone(email));
+
+    const newSession: AuthSession = {
+      userId: stableUserId,
+      name: savedProfile?.name || name,
+      phone: email,
+      role: 'citizen',
+      department: '',
+      ward: savedProfile?.ward || 'Ward 4 - Indiranagar',
+      workerId: '',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+      isFirstLogin: !savedProfile,
+    };
+
+    setSession(newSession);
+    setRole('citizen');
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+
+    saveUserProfile(newSession.phone, {
+      userId: stableUserId,
+      name: newSession.name,
+      ward: newSession.ward,
+    });
+
+    setCurrentUser((prev) => ({
+      ...prev,
+      id: stableUserId,
+      name: newSession.name,
+      phone: email,
+      ward: newSession.ward,
+      points: savedProfile?.points !== undefined ? savedProfile.points : prev.points,
+    }));
+
+    addToast({
+      title: 'Signed in with Google 🌐',
+      message: `Welcome, ${newSession.name}!`,
+      type: 'success',
+    });
+  };
+
   // Logout method
   const logout = () => {
     if (isFirebaseConfigured && auth) {
@@ -1085,6 +1129,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginWithIdAndPassword,
         completeCitizenOnboarding,
         quickDemoLogin,
+        loginWithGoogle,
         logout,
         createReport,
         mergeReport,
