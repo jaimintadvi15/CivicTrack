@@ -24,6 +24,7 @@ import { translations, TranslationStrings } from '../i18n/translations';
 import confetti from 'canvas-confetti';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { normalizePhone } from '../utils/ownership';
 import {
   subscribeToListings,
@@ -272,6 +273,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return () => unsubscribe();
     }
   }, [session?.phone]);
+
+  // Sync Supabase Auth session (e.g. Google OAuth sign-in)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sbSession) => {
+      if (sbSession?.user && (!session || session.userId !== sbSession.user.id)) {
+        const userEmail = sbSession.user.email || '';
+        const userName =
+          sbSession.user.user_metadata?.full_name ||
+          sbSession.user.user_metadata?.name ||
+          (userEmail ? userEmail.split('@')[0] : 'Citizen Hero');
+        const savedProfile = getSavedProfile(normalizePhone(userEmail));
+
+        const newSession: AuthSession = {
+          userId: sbSession.user.id,
+          name: savedProfile?.name || userName,
+          phone: userEmail,
+          role: 'citizen',
+          department: '',
+          ward: savedProfile?.ward || 'Ward 4 - Indiranagar',
+          workerId: '',
+          avatar: sbSession.user.user_metadata?.avatar_url || '',
+          isFirstLogin: !savedProfile,
+        };
+
+        setSession(newSession);
+        setRole('citizen');
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+
+        setCurrentUser((prev) => ({
+          ...prev,
+          id: sbSession.user.id,
+          name: newSession.name,
+          phone: userEmail,
+          ward: newSession.ward,
+          points: savedProfile?.points !== undefined ? savedProfile.points : prev.points,
+        }));
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [session]);
 
   const addToast = (toast: Omit<ToastData, 'id'>) => {
     const id = 'toast-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);

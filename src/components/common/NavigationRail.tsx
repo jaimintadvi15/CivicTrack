@@ -181,8 +181,8 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                       onSelectSection(item.id);
                     }}
                     className={`w-full flex items-center rounded-full transition-colors text-sm font-medium ripple-surface relative group ${isCollapsed
-                        ? 'justify-center w-12 h-12 mx-auto'
-                        : 'justify-between px-4 py-2.5'
+                      ? 'justify-center w-12 h-12 mx-auto'
+                      : 'justify-between px-4 py-2.5'
                       } ${isActive
                         ? 'bg-[#E8F0FE] text-[#1A73E8] font-semibold'
                         : 'text-[#202124] hover:bg-[#F1F3F4]'
@@ -202,8 +202,8 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                     {!isCollapsed && item.count !== undefined && (
                       <span
                         className={`text-xs px-2 py-0.2 rounded-full font-medium ${isActive
-                            ? 'bg-[#1A73E8] text-white'
-                            : 'bg-gray-100 text-[#5F6368]'
+                          ? 'bg-[#1A73E8] text-white'
+                          : 'bg-gray-100 text-[#5F6368]'
                           }`}
                       >
                         {item.count}
@@ -282,24 +282,24 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             {!isCollapsed && <span>{t.logout || 'Log Out'}</span>}
           </button>
 
-          {/* Collapse / Expand Toggle Button */}
-          <button
-            onClick={onToggleCollapse}
-            className="w-full flex items-center justify-center p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-gray-200 transition-colors"
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            aria-label={isCollapsed ? 'Expand navigation sidebar' : 'Collapse navigation sidebar'}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <div className="flex items-center space-x-1.5 text-xs text-[#5F6368]">
-                <ChevronLeft className="w-4 h-4" />
-                <span>Collapse</span>
-              </div>
-            )}
-          </button>
-        </div>
-      </aside>
+{/* Collapse / Expand Toggle Button */ }
+<button
+  onClick={onToggleCollapse}
+  className="w-full flex items-center justify-center p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-gray-200 transition-colors"
+  title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+  aria-label={isCollapsed ? 'Expand navigation sidebar' : 'Collapse navigation sidebar'}
+>
+  {isCollapsed ? (
+    <ChevronRight className="w-4 h-4" />
+  ) : (
+    <div className="flex items-center space-x-1.5 text-xs text-[#5F6368]">
+      <ChevronLeft className="w-4 h-4" />
+      <span>Collapse</span>
+    </div>
+  )}
+</button>
+        </div >
+      </aside >
     </>
   );
 };
