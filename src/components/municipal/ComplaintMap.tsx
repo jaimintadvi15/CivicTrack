@@ -23,12 +23,22 @@ export const ComplaintMap: React.FC<ComplaintMapProps> = ({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
+  const onSelectIssueRef = useRef(onSelectIssue);
+  const onAssignWorkerRef = useRef(onAssignWorker);
+
+  useEffect(() => {
+    onSelectIssueRef.current = onSelectIssue;
+    onAssignWorkerRef.current = onAssignWorker;
+  }, [onSelectIssue, onAssignWorker]);
+
   // Filter issues based on category & severity
-  const filteredIssues = issues.filter((issue) => {
-    const matchCategory = selectedCategory === 'all' || issue.category === selectedCategory;
-    const matchSeverity = selectedSeverity === 'all' || issue.severity === selectedSeverity;
-    return matchCategory && matchSeverity;
-  });
+  const filteredIssues = React.useMemo(() => {
+    return issues.filter((issue) => {
+      const matchCategory = selectedCategory === 'all' || issue.category === selectedCategory;
+      const matchSeverity = selectedSeverity === 'all' || issue.severity === selectedSeverity;
+      return matchCategory && matchSeverity;
+    });
+  }, [issues, selectedCategory, selectedSeverity]);
 
   // Get Marker Color based on severity & status (Google Brand Palette)
   const getMarkerColor = (issue: CivicIssue): string => {
@@ -170,17 +180,17 @@ export const ComplaintMap: React.FC<ComplaintMapProps> = ({
       marker.on('popupopen', () => {
         const viewBtn = document.getElementById(`btn-view-${issue.id}`);
         if (viewBtn) {
-          viewBtn.onclick = () => onSelectIssue(issue);
+          viewBtn.onclick = () => onSelectIssueRef.current(issue);
         }
         const assignBtn = document.getElementById(`btn-assign-${issue.id}`);
         if (assignBtn) {
-          assignBtn.onclick = () => onAssignWorker(issue);
+          assignBtn.onclick = () => onAssignWorkerRef.current(issue);
         }
       });
 
       markersLayerRef.current?.addLayer(marker);
     });
-  }, [filteredIssues, onSelectIssue, onAssignWorker]);
+  }, [filteredIssues]);
 
   return (
     <div className={`relative w-full ${heightClassName} rounded-xl overflow-hidden border border-[#DADCE0] shadow-elevation-1`}>
