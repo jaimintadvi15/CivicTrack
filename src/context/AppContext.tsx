@@ -26,6 +26,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { normalizePhone } from '../utils/ownership';
+import { playClappingSound } from '../utils/audio';
 import {
   subscribeToListings,
   createListingDocument,
@@ -243,6 +244,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const unreadNotificationCount = notifications.filter((n) => !n.read).length;
 
+  const issuesRef = React.useRef(issues);
+  useEffect(() => {
+    issuesRef.current = issues;
+  }, [issues]);
+
+  const sessionRef = React.useRef(session);
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
   // Real-time subscription to persistent Firestore listings
   useEffect(() => {
     const unsubscribe = subscribeToListings((liveIssues) => {
@@ -257,7 +268,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Automatic SLA background check & server-side sync engine
   useEffect(() => {
     const runSlaCheck = () => {
-      const result = evaluateAndEscalateOverdueIssues(issues);
+      const currentIssues = issuesRef.current;
+      const result = evaluateAndEscalateOverdueIssues(currentIssues);
       if (result.escalatedIssues.length > 0) {
         setIssues(result.updatedIssues);
         if (result.notifications.length > 0) {
@@ -277,14 +289,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const interval = setInterval(runSlaCheck, 30000);
 
     return () => clearInterval(interval);
-  }, [issues]);
+  }, []);
 
   // Sync Firebase Auth UID with session if phone auth completes
   useEffect(() => {
     if (isFirebaseConfigured && auth) {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser && session && session.userId !== firebaseUser.uid) {
-          const updatedSession = { ...session, userId: firebaseUser.uid };
+        const curSession = sessionRef.current;
+        if (firebaseUser && curSession && curSession.userId !== firebaseUser.uid) {
+          const updatedSession = { ...curSession, userId: firebaseUser.uid };
           setSession(updatedSession);
           localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedSession));
           setCurrentUser((prev) => ({ ...prev, id: firebaseUser.uid }));
@@ -296,8 +309,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync Supabase Auth session (e.g. Google OAuth sign-in)
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sbSession) => {
-      if (sbSession?.user && (!session || session.userId !== sbSession.user.id)) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sbSession) => {
+      const curSession = sessionRef.current;
+      if (sbSession?.user && (!curSession || curSession.userId !== sbSession.user.id)) {
         const userEmail = sbSession.user.email || '';
         const userName =
           sbSession.user.user_metadata?.full_name ||
@@ -335,7 +349,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       subscription.unsubscribe();
     };
-  }, [session]);
+  }, []);
 
   const addToast = (toast: Omit<ToastData, 'id'>) => {
     const id = 'toast-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
@@ -355,6 +369,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const triggerCelebration = () => {
     try {
+      // Play energetic celebratory clapping and cheer sound
+      playClappingSound();
+
       // Primary celebratory burst using signature Google brand palette
       confetti({
         particleCount: 75,
@@ -391,7 +408,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const celebrateBadge = (badge: Badge) => {
     setCelebratingBadge(badge);
-    triggerCelebration();
   };
 
   // Login method

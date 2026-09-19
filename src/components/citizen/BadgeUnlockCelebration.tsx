@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Sparkles, X, CheckCircle2, ShieldCheck, Share2 } from 'lucide-react';
 import { createRipple } from '../common/MaterialRipple';
+import { playClappingSound } from '../../utils/audio';
 
 export const BadgeUnlockCelebration: React.FC = () => {
   const { celebratingBadge, setCelebratingBadge, triggerCelebration, currentUser } = useApp();
@@ -33,17 +34,18 @@ export const BadgeUnlockCelebration: React.FC = () => {
         {/* Top Google 4-Color Strip */}
         <div className="google-accent-bar" />
 
+        {/* Close button positioned at top right corner */}
+        <button
+          onClick={handleClose}
+          style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 40 }}
+          className="p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-black/10 transition-colors ripple-surface cursor-pointer bg-white/80 backdrop-blur-xs border border-gray-200/60 shadow-xs"
+          aria-label="Close celebration modal"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Decorative Golden Sunburst Header */}
         <div className="relative pt-8 pb-6 px-6 bg-gradient-to-b from-[#FEF7E0] via-[#FFF9E6] to-white border-b border-[#FEEFC3]/60 overflow-hidden">
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-3 right-3 p-2 rounded-full text-[#5F6368] hover:text-[#202124] hover:bg-black/5 transition-colors ripple-surface z-10"
-            aria-label="Close celebration modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
           {/* Ambient Glow & Concentric Rings */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
             <div className="w-64 h-64 rounded-full bg-gradient-to-tr from-[#FBBC05]/30 to-[#F59E0B]/20 blur-2xl animate-pulse" />
@@ -123,6 +125,7 @@ export const BadgeUnlockCelebration: React.FC = () => {
             <button
               onClick={(e) => {
                 createRipple(e, 'rgba(0, 0, 0, 0.1)');
+                playClappingSound();
                 triggerCelebration();
               }}
               className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-lg border border-[#DADCE0] hover:bg-[#F8F9FA] text-xs font-medium text-[#3C4043] transition-colors ripple-surface flex items-center justify-center space-x-1.5"

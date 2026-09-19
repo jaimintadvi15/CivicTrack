@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Trophy, Award, Users, CheckCircle2, Lock, X, Sparkles, ChevronRight } from 'lucide-react';
 import { createRipple } from '../common/MaterialRipple';
+import { playClappingSound } from '../../utils/audio';
 
 interface GamificationHubProps {
   isOpen: boolean;
@@ -133,6 +134,7 @@ export const GamificationHub: React.FC<GamificationHubProps> = ({ isOpen, onClos
                     key={badge.id}
                     onClick={() => {
                       if (badge.unlocked) {
+                        playClappingSound();
                         celebrateBadge(badge);
                       }
                     }}
@@ -301,6 +303,7 @@ export const GamificationHub: React.FC<GamificationHubProps> = ({ isOpen, onClos
           <button
             onClick={(e) => {
               createRipple(e, 'rgba(255, 255, 255, 0.4)');
+              playClappingSound();
               const firstUnlocked = currentUser.badges.find((b) => b.unlocked);
               if (firstUnlocked) {
                 celebrateBadge(firstUnlocked);
