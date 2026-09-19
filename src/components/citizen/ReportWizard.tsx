@@ -411,7 +411,7 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
                             : 'bg-white hover:bg-gray-50 text-[#202124] border-gray-300'
                         }`}
                       >
-                        <span>{t.categories[cat]}</span>
+                        <span>{t.categories[cat] || cat}</span>
                         {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </button>
                     );

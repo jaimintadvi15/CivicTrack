@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { VoiceInputButton } from '../common/VoiceInputButton';
 import { CivicHeroLogo } from '../common/CivicHeroLogo';
+import { VoiceController } from '../common/VoiceController';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../../lib/firebase';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
@@ -237,16 +238,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onOpenLanguage }) => {
           taglineText="CHANGE YOUR CITY."
         />
 
-        <button
-          onClick={(e) => {
-            createRipple(e, 'rgba(66, 133, 244, 0.1)');
-            onOpenLanguage();
-          }}
-          className="flex items-center space-x-1.5 bg-white text-[#202124] px-3 py-1.5 rounded border border-[#DADCE0] text-xs font-medium shadow-elevation-1 hover:bg-[#F8F9FA] transition-colors ripple-surface"
-        >
-          <Globe className="w-3.5 h-3.5 text-[#4285F4]" />
-          <span>Language</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <VoiceController compact={true} />
+          <button
+            onClick={(e) => {
+              createRipple(e, 'rgba(66, 133, 244, 0.1)');
+              onOpenLanguage();
+            }}
+            className="flex items-center space-x-1.5 bg-white text-[#202124] px-3 py-1.5 rounded border border-[#DADCE0] text-xs font-medium shadow-elevation-1 hover:bg-[#F8F9FA] transition-colors ripple-surface"
+          >
+            <Globe className="w-3.5 h-3.5 text-[#4285F4]" />
+            <span>Language</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Material Authentication Card */}

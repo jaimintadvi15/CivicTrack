@@ -8,8 +8,11 @@ import {
   Trophy,
   Activity,
   X,
+  Volume2,
+  Sparkles,
 } from 'lucide-react';
 import { CivicHeroLogo } from '../common/CivicHeroLogo';
+import { speakWelcomeGreeting } from '../../utils/voiceGreeting';
 
 interface GoogleSearchHeroProps {
   searchQuery: string;
@@ -24,7 +27,7 @@ export const GoogleSearchHero: React.FC<GoogleSearchHeroProps> = ({
   onOpenReport,
   onBrowseCommunity,
 }) => {
-  const { t, currentUser } = useApp();
+  const { t, currentUser, language } = useApp();
 
   return (
     <section className="w-full py-8 sm:py-12 flex flex-col items-center justify-center">
@@ -38,6 +41,22 @@ export const GoogleSearchHero: React.FC<GoogleSearchHeroProps> = ({
           taglineText={t.tagline || 'CHANGE YOUR CITY.'}
           className="mx-auto"
         />
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1A73E8] text-xs font-medium border border-[#D2E3FC]">
+            <Sparkles className="w-3.5 h-3.5 text-[#4285F4]" />
+            <span>BBMP Bengaluru Citizen Governance Portal</span>
+          </div>
+
+          <button
+            onClick={() => speakWelcomeGreeting({ lang: language || 'en', force: true })}
+            className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F8F9FA] text-[#1A73E8] text-xs font-semibold border border-[#DADCE0] shadow-xs transition-colors hover:border-[#AECBFA]"
+            title="Listen to professional Welcome voice greeting"
+          >
+            <Volume2 className="w-3.5 h-3.5 text-[#1A73E8] animate-pulse" />
+            <span>Welcome Voice</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Prominent Centered Google Search / Action Bar */}

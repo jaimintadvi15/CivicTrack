@@ -212,6 +212,7 @@ export const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
                     loading="lazy"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
+                      target.onerror = null;
                       target.src = getAssetUrl('issues/pothole.jpg');
                     }}
                   />
@@ -240,6 +241,7 @@ export const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
+                  target.onerror = null;
                   target.src = getAssetUrl('issues/pothole.jpg');
                 }}
               />

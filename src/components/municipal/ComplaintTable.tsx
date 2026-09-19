@@ -298,6 +298,7 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                         className="w-10 h-10 rounded-lg object-cover border border-[#DADCE0] flex-shrink-0 shadow-xs"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
+                          target.onerror = null;
                           const fallback = getAssetUrl('issues/garbage.jpg');
                           if (target.src !== fallback) {
                             target.src = fallback;

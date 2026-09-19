@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { languageList } from '../../i18n/translations';
 import { CivicHeroLogo } from './CivicHeroLogo';
+import { VoiceController } from './VoiceController';
 
 interface RoleSwitcherBarProps {
   onToggleRail?: () => void;
@@ -142,6 +143,9 @@ export const RoleSwitcherBar: React.FC<RoleSwitcherBarProps> = ({
               )}
             </button>
           )}
+
+          {/* Voice Greeting Assistant Button */}
+          <VoiceController />
 
           {/* Language Selector */}
           <button

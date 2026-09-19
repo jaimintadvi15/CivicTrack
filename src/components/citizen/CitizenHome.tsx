@@ -455,6 +455,7 @@ export const CitizenHome: React.FC<CitizenHomeProps> = ({
                       loading="lazy"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
+                        target.onerror = null;
                         const fallback = getAssetUrl('issues/garbage.jpg');
                         if (target.src !== fallback) {
                           target.src = fallback;

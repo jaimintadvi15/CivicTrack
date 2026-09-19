@@ -221,13 +221,14 @@ export const FieldWorkerApp: React.FC<FieldWorkerAppProps> = ({ activeSection })
                     className="w-20 h-20 rounded object-cover border border-[#DADCE0] flex-shrink-0"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
+                      target.onerror = null;
                       const fallback = getAssetUrl('issues/garbage.jpg');
                       if (target.src !== fallback) target.src = fallback;
                     }}
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-medium text-[#1A73E8] uppercase tracking-wider block">
-                      {t.categories[task.category]}
+                      {t.categories[task.category] || task.category}
                     </span>
                     <h4 className="text-xs font-medium text-[#202124] line-clamp-2 leading-snug mt-0.5">
                       {task.title}

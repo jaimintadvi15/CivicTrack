@@ -63,7 +63,7 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
                     issue.severity
                   )}`}
                 >
-                  {t.severities[issue.severity]}
+                  {t.severities[issue.severity] || issue.severity}
                 </span>
                 {onAnalyzeWithAi && (
                   <button
@@ -137,7 +137,7 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
                         : 'text-[#5F6368]'
                     }`}
                   >
-                    {t.statuses[step]}
+                    {t.statuses[step] || step}
                   </span>
                 </div>
               );
@@ -172,6 +172,7 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
+                      target.onerror = null;
                       const fallback = getAssetUrl('issues/garbage.jpg');
                       if (target.src !== fallback) target.src = fallback;
                     }}
@@ -189,6 +190,7 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
+                      target.onerror = null;
                       const fallback = getAssetUrl('issues/garbage_after.jpg');
                       if (target.src !== fallback) target.src = fallback;
                     }}
@@ -216,6 +218,7 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
+                    target.onerror = null;
                     const fallback = getAssetUrl('issues/garbage.jpg');
                     if (target.src !== fallback) target.src = fallback;
                   }}
