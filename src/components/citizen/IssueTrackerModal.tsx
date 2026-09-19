@@ -18,9 +18,14 @@ import {
 interface IssueTrackerModalProps {
   issue: CivicIssue | null;
   onClose: () => void;
+  onAnalyzeWithAi?: (issue: CivicIssue) => void;
 }
 
-export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({ issue, onClose }) => {
+export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({
+  issue,
+  onClose,
+  onAnalyzeWithAi,
+}) => {
   const { upvoteReport, t } = useApp();
 
   if (!issue) return null;
@@ -60,6 +65,17 @@ export const IssueTrackerModal: React.FC<IssueTrackerModalProps> = ({ issue, onC
                 >
                   {t.severities[issue.severity]}
                 </span>
+                {onAnalyzeWithAi && (
+                  <button
+                    type="button"
+                    onClick={() => onAnalyzeWithAi(issue)}
+                    className="inline-flex items-center space-x-1 text-[10px] font-semibold bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded border border-white/30 transition-colors cursor-pointer"
+                    title="Analyze complaint with AI"
+                  >
+                    <Sparkles className="w-3 h-3 text-[#FBBC05]" />
+                    <span>Analyze with AI</span>
+                  </button>
+                )}
               </div>
               <h3 className="text-sm sm:text-base font-medium text-white mt-2 leading-snug">
                 {issue.title}

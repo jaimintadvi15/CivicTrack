@@ -14,11 +14,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Sparkles,
 } from 'lucide-react';
 
 interface ComplaintTableProps {
   onSelectIssue: (issue: CivicIssue) => void;
   onAssignWorker: (issue: CivicIssue) => void;
+  onAnalyzeWithAi?: (issue: CivicIssue) => void;
   categoryFilter: string;
   setCategoryFilter: (cat: string) => void;
   severityFilter: string;
@@ -28,6 +30,7 @@ interface ComplaintTableProps {
 export const ComplaintTable: React.FC<ComplaintTableProps> = ({
   onSelectIssue,
   onAssignWorker,
+  onAnalyzeWithAi,
   categoryFilter,
   setCategoryFilter,
   severityFilter,
@@ -38,7 +41,7 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [slaFilter, setSlaFilter] = useState<string>('all');
   const [wardFilter, setWardFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'priority' | 'upvotes'>('date');
+  const [sortBy, setSortBy] = useState<'priority_score' | 'date' | 'priority' | 'upvotes' | 'duplicates'>('priority_score');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 8;
 
@@ -56,7 +59,9 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
       issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.citizenName.toLowerCase().includes(searchQuery.toLowerCase());
+      issue.citizenName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (issue.aiSummary && issue.aiSummary.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (issue.assignedDepartment && issue.assignedDepartment.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesCategory = categoryFilter === 'all' || issue.category === categoryFilter;
     const matchesSeverity = severityFilter === 'all' || issue.severity === severityFilter;
@@ -77,6 +82,16 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
 
   // Sort
   const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'priority_score') {
+      const scoreA = a.priorityScore ?? (a.severity === 'Critical' ? 75 : a.severity === 'High' ? 50 : 25);
+      const scoreB = b.priorityScore ?? (b.severity === 'Critical' ? 75 : b.severity === 'High' ? 50 : 25);
+      return scoreB - scoreA;
+    }
+    if (sortBy === 'duplicates') {
+      const countA = a.reportCount || (a.mergedCount ? a.mergedCount + 1 : 1);
+      const countB = b.reportCount || (b.mergedCount ? b.mergedCount + 1 : 1);
+      return countB - countA;
+    }
     if (sortBy === 'upvotes') {
       return b.upvotes - a.upvotes;
     }
@@ -141,11 +156,13 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-medium text-[#202124] focus:outline-none focus:border-[#4285F4]"
+              className="px-2.5 py-1.5 bg-white border border-[#DADCE0] rounded-lg text-xs font-semibold text-[#202124] focus:outline-none focus:border-[#4285F4] shadow-2xs"
             >
-              <option value="date">Most Recent</option>
+              <option value="priority_score">⚡ Priority Score (AI)</option>
+              <option value="duplicates">🔥 Most Duplicates Merged</option>
               <option value="priority">Highest Severity</option>
               <option value="upvotes">Most Citizen Upvotes</option>
+              <option value="date">Most Recent</option>
             </select>
           </div>
         </div>
@@ -249,9 +266,9 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
           <thead className="bg-[#FAFAFA] text-[#5F6368] font-medium uppercase text-[10px] tracking-wider border-b border-[#DADCE0]">
             <tr>
               <th className="py-3 px-4 w-[170px] min-w-[160px] whitespace-nowrap">Ticket & Photo</th>
-              <th className="py-3 px-4 min-w-[220px]">Category & Description</th>
+              <th className="py-3 px-4 min-w-[260px]">Category & AI Summary</th>
               <th className="py-3 px-4 min-w-[170px]">Ward & Location</th>
-              <th className="py-3 px-4 w-[110px] min-w-[110px] text-center whitespace-nowrap">Severity</th>
+              <th className="py-3 px-4 w-[120px] min-w-[120px] text-center whitespace-nowrap">Severity & Score</th>
               <th className="py-3 px-4 w-[120px] min-w-[120px] text-center whitespace-nowrap">Status</th>
               <th className="py-3 px-4 w-[140px] min-w-[140px] whitespace-nowrap">SLA / Deadline</th>
               <th className="py-3 px-4 w-[150px] min-w-[140px] whitespace-nowrap">Assigned Officer</th>
@@ -296,23 +313,44 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Title & Category */}
-                  <td className="py-3 px-4 min-w-[220px] max-w-[300px]">
+                  {/* Title, Category, AI Summary, & Duplicates */}
+                  <td className="py-3 px-4 min-w-[260px] max-w-[360px]">
                     <div>
-                      <span className="text-[10px] font-semibold text-[#1A73E8] bg-[#E8F0FE] px-2 py-0.5 rounded border border-[#D2E3FC] uppercase tracking-wide inline-block mb-0.5">
-                        {t.categories[issue.category] || issue.category}
-                      </span>
-                      <h5 className="font-medium text-[#202124] text-xs truncate block" title={issue.title}>
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                        <span className="text-[10px] font-bold text-[#1A73E8] bg-[#E8F0FE] px-2 py-0.5 rounded border border-[#D2E3FC] uppercase tracking-wide inline-block">
+                          {t.categories[issue.category] || issue.category}
+                        </span>
+                        {issue.assignedDepartment && (
+                          <span className="text-[9px] font-medium text-[#5F6368] bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200 truncate max-w-[170px]" title={issue.assignedDepartment}>
+                            🏢 {issue.assignedDepartment}
+                          </span>
+                        )}
+                      </div>
+                      <h5 className="font-semibold text-[#202124] text-xs truncate block" title={issue.title}>
                         {issue.title}
                       </h5>
-                      <span className="text-[10px] text-[#5F6368] flex items-center gap-1.5 mt-0.5">
+
+                      {/* AI Generated Summary */}
+                      {issue.aiSummary && (
+                        <p className="text-[11px] text-[#3C4043] bg-blue-50/70 p-1.5 rounded border border-[#D2E3FC] mt-1 line-clamp-2 leading-relaxed" title={issue.aiSummary}>
+                          <span className="font-bold text-[#1A73E8]">AI Summary:</span> {issue.aiSummary}
+                        </p>
+                      )}
+
+                      <div className="text-[10px] text-[#5F6368] flex items-center flex-wrap gap-2 mt-1">
                         <span className="inline-flex items-center gap-1 text-[#1A73E8] font-medium">
                           <ThumbsUp className="w-3 h-3" /> {issue.upvotes}
                         </span>
-                        {issue.mergedCount > 0 && (
-                          <span className="text-gray-400">• +{issue.mergedCount} merged</span>
-                        )}
-                      </span>
+                        {(issue.reportCount && issue.reportCount > 1) ? (
+                          <span className="bg-[#FEF7E0] text-[#B06000] font-bold px-1.5 py-0.5 rounded border border-[#FBBC05]/40 text-[10px]">
+                            🔥 {issue.reportCount} Reports Merged
+                          </span>
+                        ) : issue.mergedCount > 0 ? (
+                          <span className="bg-[#FEF7E0] text-[#B06000] font-bold px-1.5 py-0.5 rounded border border-[#FBBC05]/40 text-[10px]">
+                            🔥 {issue.mergedCount + 1} Reports Merged
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </td>
 
@@ -328,15 +366,35 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Severity (Guaranteed min-width and whitespace-nowrap, never truncates!) */}
-                  <td className="py-3 px-4 w-[110px] min-w-[110px] text-center whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center justify-center text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getSeverityBadge(
-                        issue.severity
-                      )}`}
-                    >
-                      {t.severities[issue.severity] || issue.severity}
-                    </span>
+                  {/* Severity & AI Priority Score */}
+                  <td className="py-3 px-4 w-[120px] min-w-[120px] text-center whitespace-nowrap">
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className={`inline-flex items-center justify-center text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getSeverityBadge(
+                          issue.severity
+                        )}`}
+                      >
+                        {t.severities[issue.severity] || issue.severity}
+                      </span>
+                      {(() => {
+                        const score = issue.priorityScore ?? (issue.severity === 'Critical' ? 75 : issue.severity === 'High' ? 50 : 25);
+                        const scoreStyle =
+                          score >= 70
+                            ? 'bg-red-50 text-red-700 border-red-200'
+                            : score >= 40
+                            ? 'bg-amber-50 text-amber-800 border-amber-200'
+                            : 'bg-blue-50 text-blue-700 border-blue-200';
+                        return (
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded border flex items-center gap-1 ${scoreStyle}`}
+                            title="AI Priority Score (0-100)"
+                          >
+                            <span>⚡ {score}</span>
+                            <span className="text-[8px] opacity-75">/100</span>
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   {/* Status (Guaranteed min-width and whitespace-nowrap, never truncates!) */}
@@ -385,6 +443,18 @@ export const ComplaintTable: React.FC<ComplaintTableProps> = ({
                         aria-label="View issue"
                       >
                         <Eye className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          createRipple(e);
+                          onAnalyzeWithAi?.(issue);
+                        }}
+                        className="p-1.5 text-[#1A73E8] hover:bg-[#E8F0FE] rounded-lg transition-colors ripple-surface"
+                        title="Analyze complaint with AI"
+                        aria-label="Analyze with AI"
+                      >
+                        <Sparkles className="w-4 h-4 text-[#4285F4]" />
                       </button>
 
                       {issue.status !== 'Resolved' && !issue.assignedWorkerName && (

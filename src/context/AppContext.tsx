@@ -19,7 +19,7 @@ import {
   initialCurrentUser,
   initialLeaderboard,
   preProvisionedUsers,
-} from '../data/mockData';
+} from '../data';
 import { translations, TranslationStrings } from '../i18n/translations';
 import confetti from 'canvas-confetti';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -137,6 +137,12 @@ interface AppContextType {
       lat: number;
       lng: number;
     };
+    aiSummary?: string;
+    priorityScore?: number;
+    assignedDepartment?: string;
+    isDuplicate?: boolean;
+    duplicateOf?: string;
+    reportCount?: number;
   }) => CivicIssue;
   mergeReport: (existingIssueId: string) => void;
   upvoteReport: (issueId: string) => void;
@@ -726,6 +732,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lat: number;
       lng: number;
     };
+    aiSummary?: string;
+    priorityScore?: number;
+    assignedDepartment?: string;
+    isDuplicate?: boolean;
+    duplicateOf?: string;
+    reportCount?: number;
   }): CivicIssue => {
     const tempId = 'civic-' + Date.now();
     const newTicket = `BLR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -764,9 +776,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       upvotes: 1,
       hasUpvoted: true,
       mergedCount: 0,
+      reportCount: data.reportCount ?? 1,
       targetResolutionHours: data.severity === 'Critical' ? 4 : data.severity === 'High' ? 12 : 24,
       citizenId: currentUser.id,
       citizenName: currentUser.name,
+      aiSummary: data.aiSummary,
+      priorityScore: data.priorityScore ?? (data.severity === 'Critical' ? 75 : data.severity === 'High' ? 50 : 25),
+      assignedDepartment: data.assignedDepartment || 'General Municipal Administration',
+      isDuplicate: data.isDuplicate ?? false,
+      duplicateOf: data.duplicateOf,
     };
 
     // Optimistic UI state
@@ -790,6 +808,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reporterPhone: session?.phone || currentUser.phone,
       includeReporterContact: data.includeReporterContact ?? true,
       voiceNoteTranscription: data.voiceNoteTranscription,
+      aiSummary: data.aiSummary,
+      priorityScore: data.priorityScore,
+      assignedDepartment: data.assignedDepartment,
+      isDuplicate: data.isDuplicate,
+      duplicateOf: data.duplicateOf,
+      reportCount: data.reportCount,
     }).catch((err) => {
       console.error('Failed to persist listing:', err);
       if (err.message && err.message.includes('Rate limit')) {
@@ -841,10 +865,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIssues((prev) =>
       prev.map((issue) => {
         if (issue.id === existingIssueId) {
+          const nextCount = (issue.reportCount || issue.mergedCount || 1) + 1;
+          const nextPriority = Math.min(100, (issue.priorityScore || 40) + 15);
           return {
             ...issue,
             upvotes: issue.upvotes + 2,
             mergedCount: issue.mergedCount + 1,
+            reportCount: nextCount,
+            priorityScore: nextPriority,
             timeline: [
               ...issue.timeline,
               {
@@ -852,7 +880,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 status: issue.status,
                 timestamp: 'Just now',
                 title: 'Duplicate Report Merged & Boosted',
-                description: `${currentUser.name} merged a matching nearby report (+2 priority score).`,
+                description: `${currentUser.name} merged a matching nearby report (Report count: ${nextCount}, Priority score: ${nextPriority}).`,
                 actor: currentUser.name,
               },
             ],

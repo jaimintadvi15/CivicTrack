@@ -18,7 +18,7 @@ import {
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { db, storage, isFirebaseConfigured } from '../lib/firebase';
 import { CivicIssue, IssueCategory, IssueSeverity, IssueStatus, TimelineEvent, SlaStatus, EscalationEvent } from '../types';
-import { initialIssues } from '../data/mockData';
+import { initialIssues } from '../data';
 import { getAssetUrl } from '../utils/assetUrl';
 import { normalizePhone } from '../utils/ownership';
 import { getSlaDurationHours, calculateSlaDeadline, computeSlaStatus } from '../config/slaConfig';
@@ -67,6 +67,14 @@ export interface FirestoreListing {
   escalatedTo?: string;
   escalationReason?: string;
   escalationHistory?: EscalationEvent[];
+
+  // Real AI Agent & Duplicate Detection fields
+  aiSummary?: string;
+  priorityScore?: number;
+  assignedDepartment?: string;
+  isDuplicate?: boolean;
+  duplicateOf?: string;
+  reportCount?: number;
 }
 
 const LOCAL_STORAGE_KEY = 'civic_hero_persistent_listings_v1';
@@ -197,6 +205,14 @@ export const mapListingToCivicIssue = (
     escalatedTo: listing.escalatedTo,
     escalationReason: listing.escalationReason,
     escalationHistory: listing.escalationHistory || [],
+
+    // Real AI Agent fields
+    aiSummary: listing.aiSummary,
+    priorityScore: listing.priorityScore ?? (listing.severity === 'Critical' ? 75 : listing.severity === 'High' ? 50 : 25),
+    assignedDepartment: listing.assignedDepartment || 'General Municipal Administration',
+    isDuplicate: listing.isDuplicate || false,
+    duplicateOf: listing.duplicateOf,
+    reportCount: listing.reportCount || (listing.mergedCount ? listing.mergedCount + 1 : 1),
   };
 };
 
@@ -233,6 +249,12 @@ const getInitialListings = (): FirestoreListing[] => {
     resolutionRemarks: issue.resolutionRemarks,
     resolvedAt: issue.resolvedAt,
     voiceNoteTranscription: issue.voiceNoteTranscription,
+    aiSummary: issue.aiSummary,
+    priorityScore: issue.priorityScore,
+    assignedDepartment: issue.assignedDepartment,
+    isDuplicate: issue.isDuplicate,
+    duplicateOf: issue.duplicateOf,
+    reportCount: issue.reportCount || 1,
   }));
 };
 
@@ -246,8 +268,21 @@ const loadLocalListings = (): FirestoreListing[] => {
       return init;
     }
     const parsed: FirestoreListing[] = JSON.parse(raw);
-    const cleaned = parsed.filter((l) => !isPurgedListing(l));
-    if (cleaned.length !== parsed.length) {
+    const cleaned = parsed
+      .filter((l) => !isPurgedListing(l))
+      .map((l) => {
+        if (l.id === 'civic-101') {
+          return {
+            ...l,
+            photos: [getAssetUrl('issues/pothole.jpg')],
+            resolvedPhotoUrl: getAssetUrl('issues/pothole_after.jpg'),
+            description:
+              'A deep, dangerous pothole with fractured asphalt edges and standing rainwater has formed across the main traffic lane near 12th Main Junction, posing a severe accident and skidding risk to two-wheelers and commuters.',
+          };
+        }
+        return l;
+      });
+    if (JSON.stringify(cleaned) !== raw) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
     }
     return cleaned;
@@ -432,6 +467,12 @@ export const createListingDocument = async (
     reporterPhone?: string;
     includeReporterContact?: boolean;
     voiceNoteTranscription?: string;
+    aiSummary?: string;
+    priorityScore?: number;
+    assignedDepartment?: string;
+    isDuplicate?: boolean;
+    duplicateOf?: string;
+    reportCount?: number;
   }
 ): Promise<CivicIssue> => {
   // 1. Check Rate Limit
@@ -489,6 +530,12 @@ export const createListingDocument = async (
     slaDeadlineAt,
     slaStatus,
     voiceNoteTranscription: data.voiceNoteTranscription,
+    aiSummary: data.aiSummary,
+    priorityScore: data.priorityScore,
+    assignedDepartment: data.assignedDepartment,
+    isDuplicate: data.isDuplicate,
+    duplicateOf: data.duplicateOf,
+    reportCount: data.reportCount ?? 1,
     timeline: [
       {
         id: 't-' + Date.now(),

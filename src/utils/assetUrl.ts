@@ -9,6 +9,8 @@ export const getAssetUrl = (path: string): string => {
     return path;
   }
   const unsplashMap: Record<string, string> = {
+    'issues/pothole.jpg': 'https://images.unsplash.com/photo-1601026909629-bad5e1122bc6?auto=format&fit=crop&w=1200&q=80',
+    'issues/pothole_after.jpg': 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80',
     'issues/garbage.jpg': 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80',
     'issues/garbage_after.jpg': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&q=80',
     'issues/waterleak.jpg': 'https://images.unsplash.com/photo-1542034026-613d2f2b38f8?auto=format&fit=crop&w=800&q=80',
@@ -19,12 +21,17 @@ export const getAssetUrl = (path: string): string => {
     'issues/drain_after.jpg': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&q=80',
   };
 
-  if (unsplashMap[path]) {
-    return unsplashMap[path];
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const strippedPath = cleanPath.replace(/^Civic-Hero\//, '');
+
+  if (unsplashMap[strippedPath]) {
+    return unsplashMap[strippedPath];
+  }
+  if (unsplashMap[cleanPath]) {
+    return unsplashMap[cleanPath];
   }
 
   const base = (import.meta as any).env?.BASE_URL || '/Civic-Hero/';
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
   return `${cleanBase}${cleanPath}`;
 };

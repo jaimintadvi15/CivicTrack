@@ -18,18 +18,23 @@ import {
   Flag,
   Trash2,
   User,
+  Sparkles,
+  Building2,
+  Bot,
 } from 'lucide-react';
 
 interface IssueDetailPanelProps {
   issue: CivicIssue | null;
   onClose: () => void;
   onOpenFullModal?: () => void;
+  onAnalyzeWithAi?: (issue: CivicIssue) => void;
 }
 
 export const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
   issue,
   onClose,
   onOpenFullModal,
+  onAnalyzeWithAi,
 }) => {
   const { upvoteReport, flagReport, deleteReport, currentUser, role, t } = useApp();
 
@@ -240,6 +245,53 @@ export const IssueDetailPanel: React.FC<IssueDetailPanelProps> = ({
               />
             </div>
           )}
+        </div>
+
+        {/* AI Agent Intelligence Block */}
+        <div className="bg-gradient-to-br from-[#E8F0FE] to-[#F8F9FA] rounded-xl border border-[#D2E3FC] p-4 space-y-3 shadow-elevation-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-[#1A73E8]">
+              <Sparkles className="w-4 h-4 text-[#FBBC05]" />
+              <span className="text-xs font-bold uppercase tracking-wider">AI Inspection & Routing</span>
+            </div>
+            <span className="text-[10px] font-semibold bg-white text-[#1A73E8] px-2 py-0.5 rounded-full border border-[#D2E3FC]">
+              Claude Agent
+            </span>
+          </div>
+
+          {issue.aiSummary && (
+            <p className="text-xs text-[#202124] leading-relaxed bg-white/80 p-2.5 rounded-lg border border-[#D2E3FC]/70">
+              <strong className="text-[#1A73E8] font-semibold">AI Summary: </strong>
+              {issue.aiSummary}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+              <span className="text-[10px] font-medium text-[#5F6368] uppercase block">Assigned Dept</span>
+              <span className="font-bold text-xs text-[#202124] truncate block mt-0.5">
+                🏢 {issue.assignedDepartment || 'Roads & Infrastructure'}
+              </span>
+            </div>
+            <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+              <span className="text-[10px] font-medium text-[#5F6368] uppercase block">Priority Score</span>
+              <span className="font-black text-xs text-[#202124] flex items-center gap-1 mt-0.5">
+                ⚡ {issue.priorityScore ?? (issue.severity === 'Critical' ? 75 : issue.severity === 'High' ? 50 : 25)}/100
+                {(issue.reportCount && issue.reportCount > 1) && (
+                  <span className="text-[10px] text-[#B06000] font-normal ml-auto">({issue.reportCount} reports)</span>
+                )}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onAnalyzeWithAi?.(issue)}
+            className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 bg-white hover:bg-[#E8F0FE] text-[#1A73E8] border border-[#D2E3FC] rounded-lg text-xs font-semibold shadow-2xs hover:shadow-xs transition-all active:scale-98"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#4285F4]" />
+            <span>Analyze with AI</span>
+          </button>
         </div>
 
         {/* Description & Category */}

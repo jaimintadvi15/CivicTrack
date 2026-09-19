@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { IssueCategory, IssueSeverity } from '../../types';
-import { samplePresetImages } from '../../data/mockData';
+import { samplePresetImages } from '../../data';
 import { simulateAIDetection, findNearbyDuplicate } from '../../utils/aiSimulation';
+import { classifyIssueWithAi } from '../../services/aiIssueService';
+import { improveComplaintDescription, detectImageIssue } from '../../services/aiService';
 import { VoiceInputButton } from '../common/VoiceInputButton';
 import { getAssetUrl } from '../../utils/assetUrl';
 import { createRipple } from '../common/MaterialRipple';
@@ -14,7 +16,10 @@ import {
   ChevronRight,
   ChevronLeft,
   X,
-  Plus
+  Plus,
+  Building2,
+  Bot,
+  Activity,
 } from 'lucide-react';
 
 
@@ -70,12 +75,53 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
   const [aiSummary, setAiSummary] = useState<string>('');
   const [aiConfidence, setAiConfidence] = useState<number>(94);
   const [aiTags, setAiTags] = useState<string[]>([]);
+  const [assignedDepartment, setAssignedDepartment] = useState<string>('Roads & Infrastructure Department');
+  const [priorityScore, setPriorityScore] = useState<number>(50);
+  const [aiAgentSource, setAiAgentSource] = useState<'claude_edge_function' | 'local_intelligent_fallback'>('claude_edge_function');
 
   // Duplicate Match
   const [nearbyDuplicate, setNearbyDuplicate] = useState<{
     duplicate: (typeof issues)[0];
     distanceMeters: number;
   } | null>(null);
+
+  // AI Drafting & Image Analysis
+  const [isRefiningDraft, setIsRefiningDraft] = useState<boolean>(false);
+  const [imageAnalysisResult, setImageAnalysisResult] = useState<{
+    detectedCategory: IssueCategory;
+    severity: IssueSeverity;
+    confidence: number;
+    label: string;
+  } | null>(null);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState<boolean>(false);
+
+  const handleHelpWriteComplaint = async () => {
+    const raw = description || title || 'Issue reported near my area';
+    setIsRefiningDraft(true);
+    try {
+      const result = await improveComplaintDescription(raw, category);
+      if (result.description) setDescription(result.description);
+      if (result.title) setTitle(result.title);
+      if (result.category) setCategory(result.category);
+    } catch (err) {
+      console.warn('Draft assistance error:', err);
+    } finally {
+      setIsRefiningDraft(false);
+    }
+  };
+
+  const handleAnalyzeImage = async () => {
+    if (photos.length === 0) return;
+    setIsAnalyzingImage(true);
+    try {
+      const result = await detectImageIssue(photos[0]);
+      setImageAnalysisResult(result);
+    } catch (err) {
+      console.warn('Image analysis error:', err);
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
 
   const categories: IssueCategory[] = [
     'Pothole',
@@ -156,26 +202,60 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
     setPhotoFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  // Run AI Detection when moving to Step 2
-  const runAiDetection = () => {
+  // Run AI Detection when moving to Step 2 via Claude Edge Function
+  const runAiDetection = async () => {
     setIsAnalyzing(true);
     setCurrentStep(2);
 
-    setTimeout(() => {
-      const promptText = `${title} ${description} ${voiceTranscription} ${photoHint}`;
-      const res = simulateAIDetection(promptText, photoHint);
-      
-      setCategory((prev) => (prev === 'Other' ? prev : res.category));
-      setSeverity((prev) => (prev ? prev : res.severity));
-      setAiSummary(res.summary);
-      setAiConfidence(Math.round(res.confidence * 100));
-      setAiTags(res.tags);
-      setIsAnalyzing(false);
+    try {
+      const promptText = `${title} ${description} ${voiceTranscription} ${photoHint}`.trim();
+      const result = await classifyIssueWithAi({
+        title,
+        description: promptText,
+        photoUrl: photos[0],
+        photoFile: photoFiles[0],
+        lat: gpsCoords.lat,
+        lng: gpsCoords.lng,
+        address: manualAddress,
+        ward: selectedWard,
+        existingIssues: issues,
+      });
 
-      // Check for nearby duplicates based on GPS & Category
-      const dup = findNearbyDuplicate(res.category, gpsCoords.lat, gpsCoords.lng, issues);
-      setNearbyDuplicate(dup);
-    }, 800);
+      setCategory((prev) => (prev === 'Other' && customCategory ? prev : result.category));
+      setSeverity(result.severity);
+      setAiSummary(result.aiSummary);
+      setAssignedDepartment(result.assignedDepartment);
+      setPriorityScore(result.priorityScore);
+      setAiConfidence(result.confidence);
+      setAiAgentSource(result.source);
+
+      if (result.isDuplicate && result.duplicateMatch) {
+        const existing = issues.find((i) => i.id === result.duplicateMatch?.id);
+        if (existing) {
+          setNearbyDuplicate({
+            duplicate: existing,
+            distanceMeters: result.duplicateMatch.distanceMeters,
+          });
+        } else {
+          setNearbyDuplicate({
+            duplicate: {
+              ...issues[0],
+              id: result.duplicateMatch.id,
+              ticketNumber: result.duplicateMatch.ticketNumber,
+              title: result.duplicateMatch.title,
+              location: { ...issues[0].location, address: manualAddress },
+            },
+            distanceMeters: result.duplicateMatch.distanceMeters,
+          });
+        }
+      } else {
+        setNearbyDuplicate(null);
+      }
+    } catch (err) {
+      console.warn('AI classification error:', err);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   // One-Tap Submit New Community Listing
@@ -198,6 +278,12 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
         lat: gpsCoords.lat,
         lng: gpsCoords.lng,
       },
+      aiSummary,
+      priorityScore,
+      assignedDepartment,
+      isDuplicate: Boolean(nearbyDuplicate),
+      duplicateOf: nearbyDuplicate?.duplicate.id,
+      reportCount: 1,
     });
 
     onSubmitted(newIssue.id);
@@ -435,7 +521,16 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
                   <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
                     Detailed Description
                   </label>
-                  <span className="text-[11px] text-slate-500">Voice or text input</span>
+                  <button
+                    type="button"
+                    onClick={handleHelpWriteComplaint}
+                    disabled={isRefiningDraft}
+                    className="inline-flex items-center space-x-1 text-[11px] font-semibold text-[#1A73E8] hover:text-[#174EA6] bg-[#E8F0FE] hover:bg-[#D2E3FC] px-2.5 py-0.5 rounded-full transition-colors border border-[#D2E3FC] active:scale-98"
+                    title="Convert informal notes into a clear municipal complaint"
+                  >
+                    <Sparkles className="w-3 h-3 text-[#4285F4]" />
+                    <span>{isRefiningDraft ? 'Drafting...' : 'Help me write this complaint'}</span>
+                  </button>
                 </div>
 
                 <div className="relative">
@@ -509,8 +604,38 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
                   <label className="block text-xs font-medium text-mat-text-primary uppercase tracking-wider">
                     Evidence Photos ({photos.length}/3)
                   </label>
-                  <span className="text-[11px] text-mat-text-secondary">Up to 3 photos</span>
+                  {photos.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleAnalyzeImage}
+                      disabled={isAnalyzingImage}
+                      className="inline-flex items-center space-x-1 text-[11px] font-semibold text-[#1A73E8] hover:bg-[#E8F0FE] px-2.5 py-0.5 rounded-full border border-[#D2E3FC] transition-colors active:scale-98"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#4285F4]" />
+                      <span>{isAnalyzingImage ? 'Analyzing...' : 'Analyze Image'}</span>
+                    </button>
+                  )}
                 </div>
+
+                {/* Possible Issue Detected Alert */}
+                {imageAnalysisResult && (
+                  <div className="mb-2.5 p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between text-xs animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4 text-[#1A73E8] shrink-0" />
+                      <span className="text-[#174EA6] font-medium">{imageAnalysisResult.label}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategory(imageAnalysisResult.detectedCategory);
+                        setSeverity(imageAnalysisResult.severity);
+                      }}
+                      className="text-[11px] bg-[#1A73E8] hover:bg-[#1557B0] text-white px-2.5 py-1 rounded font-medium shadow-xs transition-colors shrink-0"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
 
                 {/* Photo Gallery Grid */}
                 <div className="grid grid-cols-3 gap-2 mb-2.5">
@@ -590,47 +715,91 @@ export const ReportWizard: React.FC<ReportWizardProps> = ({ isOpen, onClose, onS
           {currentStep === 2 && (
             <div className="space-y-5">
               {isAnalyzing ? (
-                <div className="text-center py-12 space-y-4">
-                  <div className="w-16 h-16 rounded-full border-4 border-[#4285F4] border-t-transparent animate-spin mx-auto" />
-                  <h3 className="text-lg font-black text-slate-900">AI Vision & NLP Analysis</h3>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Analyzing photo evidence, extracting civic hazard severity, and cross-referencing nearby ward reports...
-                  </p>
+                <div className="text-center py-12 px-4 space-y-5 bg-gradient-to-b from-[#F8F9FA] to-white rounded-xl border border-gray-200">
+                  <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-4 border-[#4285F4]/30 animate-ping" />
+                    <div className="w-16 h-16 rounded-full border-4 border-[#4285F4] border-t-transparent animate-spin" />
+                    <Bot className="w-7 h-7 text-[#4285F4] absolute" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-[#202124] flex items-center justify-center gap-2">
+                      <Sparkles className="w-5 h-5 text-[#FBBC05] animate-pulse" />
+                      AI is analyzing your report...
+                    </h3>
+                    <p className="text-xs text-[#5F6368] max-w-md mx-auto mt-1 leading-relaxed">
+                      Calling Anthropic Claude AI Agent with forced structured schema to classify hazard severity, compute priority score, and check for nearby duplicates within 100m.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-md mx-auto pt-2 text-[10px] font-medium text-[#5F6368]">
+                    <div className="p-2 bg-white rounded border border-gray-200 shadow-2xs">
+                      📸 Vision Inspection
+                    </div>
+                    <div className="p-2 bg-white rounded border border-gray-200 shadow-2xs">
+                      ⚡ Priority Scoring
+                    </div>
+                    <div className="p-2 bg-white rounded border border-gray-200 shadow-2xs">
+                      📍 100m Geo-Duplicate
+                    </div>
+                    <div className="p-2 bg-white rounded border border-gray-200 shadow-2xs">
+                      🏢 Dept Assignment
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {/* AI Results Card */}
-                  <div className="bg-[#E8F0FE] p-4 rounded border border-[#D2E3FC] space-y-3 shadow-elevation-1">
-                    <div className="flex items-center space-x-2 text-[#1A73E8]">
-                      <Sparkles className="w-5 h-5 text-[#4285F4]" />
-                      <span className="font-medium text-xs uppercase tracking-wider">AI Vision Classification</span>
+                  <div className="bg-[#E8F0FE] p-4 rounded-xl border border-[#D2E3FC] space-y-3 shadow-elevation-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-[#1A73E8]">
+                        <Bot className="w-5 h-5 text-[#4285F4]" />
+                        <span className="font-bold text-xs uppercase tracking-wider">AI Agent Classification</span>
+                      </div>
+                      <span className="text-[10px] font-semibold bg-white text-[#1A73E8] px-2 py-0.5 rounded-full border border-[#D2E3FC] flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-[#FBBC05]" />
+                        {aiAgentSource === 'claude_edge_function' ? 'Claude Sonnet 4.6 (Tool Use)' : 'Intelligent AI Agent'}
+                      </span>
                     </div>
 
-                    <p className="text-xs text-[#202124] leading-relaxed font-normal">
+                    <p className="text-xs text-[#202124] leading-relaxed font-medium bg-white/70 p-3 rounded-lg border border-[#D2E3FC]/60">
                       {aiSummary}
                     </p>
 
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <span className="bg-white px-2.5 py-1 rounded text-xs font-medium text-[#1A73E8] border border-[#D2E3FC]">
-                        Category: {category}
-                      </span>
-                      <span className="bg-white px-2.5 py-1 rounded text-xs font-medium text-[#1A73E8] border border-[#D2E3FC]">
-                        Severity: {severity}
-                      </span>
-                      <span className="bg-white px-2.5 py-1 rounded text-xs font-medium text-[#1A73E8] border border-[#D2E3FC]">
-                        Confidence: {aiConfidence}%
-                      </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                      <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+                        <span className="text-[10px] text-[#5F6368] font-medium uppercase block">Category</span>
+                        <span className="text-xs font-bold text-[#1A73E8] truncate block mt-0.5">{category}</span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+                        <span className="text-[10px] text-[#5F6368] font-medium uppercase block">Severity</span>
+                        <span className={`text-xs font-bold truncate block mt-0.5 ${
+                          severity === 'Critical' ? 'text-[#C5221F]' : severity === 'High' ? 'text-[#B06000]' : 'text-[#1A73E8]'
+                        }`}>
+                          {severity}
+                        </span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+                        <span className="text-[10px] text-[#5F6368] font-medium uppercase block">Priority Score</span>
+                        <span className="text-xs font-black text-[#202124] flex items-center gap-1 mt-0.5">
+                          <Activity className="w-3.5 h-3.5 text-[#34A853]" />
+                          {priorityScore}/100
+                        </span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-lg border border-[#D2E3FC]">
+                        <span className="text-[10px] text-[#5F6368] font-medium uppercase block">Confidence</span>
+                        <span className="text-xs font-bold text-[#137333] truncate block mt-0.5">{aiConfidence}%</span>
+                      </div>
                     </div>
 
-                    {aiTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {aiTags.map((tag, idx) => (
-                          <span key={idx} className="text-[10px] bg-white text-[#1A73E8] border border-[#D2E3FC] font-medium px-2 py-0.5 rounded">
-                            #{tag}
-                          </span>
-                        ))}
+                    {/* Auto-Assigned Municipal Department Banner */}
+                    <div className="bg-white p-3 rounded-lg border border-[#D2E3FC] flex items-center space-x-2.5 text-xs text-[#202124]">
+                      <div className="w-7 h-7 rounded bg-[#E8F0FE] text-[#1A73E8] flex items-center justify-center shrink-0">
+                        <Building2 className="w-4 h-4" />
                       </div>
-                    )}
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-[#5F6368] font-medium uppercase block">Auto-Assigned Municipal Department</span>
+                        <span className="font-bold text-xs text-[#202124] truncate block">{assignedDepartment}</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* DUPLICATE WARNING / MERGE FLOW */}

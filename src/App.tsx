@@ -16,6 +16,7 @@ import { MunicipalDashboard } from './components/municipal/MunicipalDashboard';
 import { FieldWorkerApp } from './components/worker/FieldWorkerApp';
 import { TransparencyDashboard } from './components/transparency/TransparencyDashboard';
 import { CivicHeroLogo } from './components/common/CivicHeroLogo';
+import { CivicTrackAI, ComplaintAIAnalysis } from './components/ai';
 import { CivicIssue } from './types';
 
 const MainApp: React.FC = () => {
@@ -62,6 +63,22 @@ const MainApp: React.FC = () => {
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
   const [isGamificationModalOpen, setIsGamificationModalOpen] = useState<boolean>(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
+
+  // CivicTrack AI Assistant & Smart Analysis State
+  const [analyzingIssue, setAnalyzingIssue] = useState<CivicIssue | null>(null);
+  const [aiChatInitialQuery, setAiChatInitialQuery] = useState<string | undefined>(undefined);
+  const [aiActiveTicket, setAiActiveTicket] = useState<string | undefined>(undefined);
+  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
+
+  const handleSelectTicketFromAi = (ticketNumber: string) => {
+    const cleanNum = ticketNumber.replace(/[-\s]/g, '').toUpperCase();
+    const found = issues.find(
+      (i) => i.ticketNumber.replace(/[-\s]/g, '').toUpperCase() === cleanNum
+    );
+    if (found) {
+      setSelectedIssueForPane(found);
+    }
+  };
 
   // If not authenticated, present phone + OTP login screen
   if (!isAuthenticated) {
@@ -187,6 +204,7 @@ const MainApp: React.FC = () => {
             setSelectedIssueForTracking(selectedIssueForPane);
             setSelectedIssueForPane(null);
           }}
+          onAnalyzeWithAi={(issue) => setAnalyzingIssue(issue)}
         />
       )}
 
@@ -206,6 +224,7 @@ const MainApp: React.FC = () => {
         <IssueTrackerModal
           issue={selectedIssueForTracking}
           onClose={() => setSelectedIssueForTracking(null)}
+          onAnalyzeWithAi={(issue) => setAnalyzingIssue(issue)}
         />
       )}
 
@@ -236,6 +255,26 @@ const MainApp: React.FC = () => {
 
       {/* Real-Time XP Toast Notifications */}
       <ToastNotification />
+
+      {/* 6. CivicTrack AI Floating Assistant & Smart Analysis Modal */}
+      <CivicTrackAI
+        onSelectTicket={handleSelectTicketFromAi}
+        initialQuery={aiChatInitialQuery}
+        activeTicketNumber={aiActiveTicket}
+        isOpenControlled={isAiOpen}
+        onToggleOpen={setIsAiOpen}
+      />
+
+      <ComplaintAIAnalysis
+        issue={analyzingIssue}
+        isOpen={Boolean(analyzingIssue)}
+        onClose={() => setAnalyzingIssue(null)}
+        onAskAiAboutIssue={(issue) => {
+          setAiActiveTicket(issue.ticketNumber);
+          setAiChatInitialQuery(`Tell me about complaint #${issue.ticketNumber} and its current SLA status.`);
+          setIsAiOpen(true);
+        }}
+      />
     </div>
   );
 };

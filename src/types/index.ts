@@ -90,6 +90,14 @@ export interface CivicIssue {
   escalatedTo?: string;
   escalationReason?: string;
   escalationHistory?: EscalationEvent[];
+
+  // Real AI Agent & Duplicate Detection fields
+  aiSummary?: string;
+  priorityScore?: number;
+  assignedDepartment?: string;
+  isDuplicate?: boolean;
+  duplicateOf?: string;
+  reportCount?: number;
 }
 
 
@@ -185,3 +193,5 @@ export interface PreProvisionedUser {
   avatar?: string;
   inviteCode?: string;
 }
+
+export * from './ai';

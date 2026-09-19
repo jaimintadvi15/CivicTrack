@@ -4,7 +4,6 @@ import { createRipple } from '../common/MaterialRipple';
 import {
   Search,
   Camera,
-  Sparkles,
   ArrowRight,
   Trophy,
   Activity,
@@ -39,11 +38,6 @@ export const GoogleSearchHero: React.FC<GoogleSearchHeroProps> = ({
           taglineText={t.tagline || 'CHANGE YOUR CITY.'}
           className="mx-auto"
         />
-
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1A73E8] text-xs font-medium border border-[#D2E3FC]">
-          <Sparkles className="w-3.5 h-3.5 text-[#4285F4]" />
-          <span>BBMP Bengaluru Citizen Governance Portal</span>
-        </div>
       </div>
 
       {/* 2. Prominent Centered Google Search / Action Bar */}

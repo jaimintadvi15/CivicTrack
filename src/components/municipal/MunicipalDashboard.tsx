@@ -6,6 +6,7 @@ import { ComplaintMap } from './ComplaintMap';
 import { ComplaintTable } from './ComplaintTable';
 import { AssignWorkerModal } from './AssignWorkerModal';
 import { IssueTrackerModal } from '../citizen/IssueTrackerModal';
+import { ComplaintAIAnalysis } from '../ai/ComplaintAIAnalysis';
 import { createRipple } from '../common/MaterialRipple';
 import {
   LayoutDashboard,
@@ -27,6 +28,7 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
 
   const [selectedIssue, setSelectedIssue] = useState<CivicIssue | null>(null);
   const [assigningIssue, setAssigningIssue] = useState<CivicIssue | null>(null);
+  const [analyzingIssue, setAnalyzingIssue] = useState<CivicIssue | null>(null);
 
   React.useEffect(() => {
     if (activeSection === 'queue') {
@@ -151,6 +153,7 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
               <ComplaintTable
                 onSelectIssue={(issue) => setSelectedIssue(issue)}
                 onAssignWorker={(issue) => setAssigningIssue(issue)}
+                onAnalyzeWithAi={(issue) => setAnalyzingIssue(issue)}
                 categoryFilter={categoryFilter}
                 setCategoryFilter={setCategoryFilter}
                 severityFilter={severityFilter}
@@ -185,6 +188,7 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
             <ComplaintTable
               onSelectIssue={(issue) => setSelectedIssue(issue)}
               onAssignWorker={(issue) => setAssigningIssue(issue)}
+              onAnalyzeWithAi={(issue) => setAnalyzingIssue(issue)}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
               severityFilter={severityFilter}
@@ -207,6 +211,15 @@ export const MunicipalDashboard: React.FC<MunicipalDashboardProps> = ({ activeSe
         <IssueTrackerModal
           issue={selectedIssue}
           onClose={() => setSelectedIssue(null)}
+        />
+      )}
+
+      {/* Smart Complaint AI Analysis Modal */}
+      {analyzingIssue && (
+        <ComplaintAIAnalysis
+          issue={analyzingIssue}
+          isOpen={Boolean(analyzingIssue)}
+          onClose={() => setAnalyzingIssue(null)}
         />
       )}
     </div>
